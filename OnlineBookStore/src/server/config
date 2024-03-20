@@ -1,4 +1,4 @@
 port=12345
 db.URL =jdbc:mysql://localhost:3306/bookstore
 db.USERNAME =root
-db.PASSWORD =01027758872s
+db.PASSWORD =
