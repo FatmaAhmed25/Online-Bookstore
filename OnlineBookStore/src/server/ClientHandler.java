@@ -1,7 +1,8 @@
 package server;
 
-import service.UserService;
-import model.User;
+import server.service.DatabaseService;
+import server.service.UserService;
+import server.model.User;
 import java.io.*;
 import java.net.Socket;
 import java.sql.SQLException;
@@ -10,9 +11,10 @@ public class ClientHandler extends Thread {
     private final Socket clientSocket;
     private final UserService userService;
 
+
     public ClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
-        this.userService = new UserService();
+        this.userService = new UserService(new DatabaseService());
     }
 
     @Override
@@ -57,7 +59,6 @@ public class ClientHandler extends Thread {
 
             // Check if the password is correct
             if (!userService.authenticateUser(username, password)) {
-
                 writer.println("401 Unauthorized: Wrong password");
                 return;
             }

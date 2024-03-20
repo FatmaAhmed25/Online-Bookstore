@@ -1,10 +1,11 @@
 package server;
 
-import service.DatabaseService;
+import server.service.DatabaseService;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+
 
 public class BookStoreServer {
     private static final int PORT = 12345;

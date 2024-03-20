@@ -1,4 +1,4 @@
-package model;
+package server.model;
 
 public class User {
     private String name;
