@@ -2,7 +2,6 @@ package server.service;
 import server.model.User;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.*;
 import java.util.Properties;
@@ -43,8 +42,19 @@ public class DatabaseService {
                     "author VARCHAR(255)," +
                     "genre VARCHAR(255)," +
                     "price DOUBLE," +
-                    "quantity INT)";
+                    "quantity INT," +
+                    "owner_id INT," +  // ID of the owner
+                    "FOREIGN KEY (owner_id) REFERENCES Users(id))";  //Foreign key constraint for owner_id
             stmt.execute(createBooksTableSQL);
+
+            //many-to-many relationship between users and books (lentBy relationship)
+            String createLentBooksTableSQL = "CREATE TABLE IF NOT EXISTS LentBooks (" +
+                    "book_id INT," +
+                    "user_id INT," +
+                    "FOREIGN KEY (book_id) REFERENCES Books(id)," +
+                    "FOREIGN KEY (user_id) REFERENCES Users(id)," +
+                    "PRIMARY KEY (book_id, user_id))";  // Composite primary key to ensure uniqueness
+            stmt.execute(createLentBooksTableSQL);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -70,5 +80,23 @@ public class DatabaseService {
             }
         }
         return null;
+    }
+    public void addBookToDatabase(Connection conn, String title, String author, String genre, int quantity, double price, int ownerId) throws SQLException {
+        String addBookSQL = "INSERT INTO Books (title, author, genre, quantity, price, owner_id) VALUES (?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement pstmt = conn.prepareStatement(addBookSQL)) {
+            pstmt.setString(1, title);
+            pstmt.setString(2, author);
+            pstmt.setString(3, genre);
+            pstmt.setInt(4, quantity);
+            pstmt.setDouble(5, price);
+            pstmt.setInt(6, ownerId);
+
+            pstmt.executeUpdate();
+            System.out.println("Book added to the database.");
+        } catch (SQLException e) {
+            System.out.println("Error adding book to the database: " + e.getMessage());
+            throw e;
+        }
     }
 }

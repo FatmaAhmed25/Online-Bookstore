@@ -63,7 +63,7 @@ public class ClientHandler extends Thread {
                 return;
             }
 
-            writer.println("Login successful");
+            writer.println("200 Login successful");
         } catch (SQLException e) {
             e.printStackTrace();
             writer.println("Error occurred during login");

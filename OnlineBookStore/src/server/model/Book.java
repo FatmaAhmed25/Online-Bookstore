@@ -7,8 +7,9 @@ public class Book {
     private String author;
     private String genre; // can be enum
     private double price;
-    private int quantity; // can be queried
-    private List<User> users;
+    private int quantity;
+    private User owner;
+    private List<User> lentBy;
     public String getTitle() {
         return title;
     }
@@ -49,12 +50,20 @@ public class Book {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-    public List<User> getUsers() {
-        return users;
+    public List<User> getLentBy() {
+        return lentBy;
     }
 
     public void addUser(User user) {
-        this.users.add(user);
+        this.lentBy.add(user);
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
     }
 
     @Override
@@ -65,7 +74,7 @@ public class Book {
                 ", genre='" + genre + '\'' +
                 ", price='" + price +'\''+
                 ", quantity='" + quantity +'\''+
-                ", users =" + users +
+                ", users =" + lentBy +
                 '}';
     }
 }
