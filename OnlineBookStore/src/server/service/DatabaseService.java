@@ -1,4 +1,5 @@
 package server.service;
+import server.model.Book;
 import server.model.User;
 
 import java.io.FileInputStream;
@@ -37,14 +38,15 @@ public class DatabaseService {
                     "username VARCHAR(255) UNIQUE," +
                     "password VARCHAR(255))";
             stmt.execute(createUserTableSQL);
-            String createBooksTableSQL = "CREATE TABLE IF NOT EXISTS Books (" +
+            // SQL query to create the Book table
+            String createBookTableSQL = "CREATE TABLE IF NOT EXISTS Book (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
                     "title VARCHAR(255)," +
                     "author VARCHAR(255)," +
                     "genre VARCHAR(255)," +
-                    "price DOUBLE," +
-                    "quantity INT)";
-            stmt.execute(createBooksTableSQL);
+                    "price DECIMAL(10, 2)," +
+                    "description VARCHAR(255))";
+            stmt.execute(createBookTableSQL);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -70,5 +72,32 @@ public class DatabaseService {
             }
         }
         return null;
+    }
+    public  void addBook(Book book) {
+
+        System.out.println("hiii"+book);
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(
+                     "INSERT INTO Book (title, author, genre, price, description) VALUES (?, ?, ?, ?, ?)")) {
+            pstmt.setString(1, book.getTitle());
+            pstmt.setString(2, book.getAuthor());
+            pstmt.setString(3, book.getGenre());
+            pstmt.setDouble(4, book.getPrice());
+            pstmt.setString(5, book.getDescription());
+
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void removeBook(int bookId) {
+        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+             PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Book WHERE id = ?")) {
+            pstmt.setInt(1, bookId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }
