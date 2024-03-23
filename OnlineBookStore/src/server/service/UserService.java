@@ -1,6 +1,11 @@
 package server.service;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.*;
+import java.util.Properties;
+
+import server.model.Book;
 import server.model.User;
 public class UserService {
     private DatabaseService databaseService;
@@ -24,4 +29,10 @@ public class UserService {
         User user = getUser(username);
         return user != null;
     }
+    public  void addBook(Book book) throws SQLException {
+        databaseService.addBook(book);
+    }
+
 }
+
+

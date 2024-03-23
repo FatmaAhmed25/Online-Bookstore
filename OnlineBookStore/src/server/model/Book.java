@@ -7,8 +7,24 @@ public class Book {
     private String author;
     private String genre; // can be enum
     private double price;
+    private String description;
     private int quantity; // can be queried
     private List<User> users;
+
+    public Book(String title, String author, String genre, double price, String description) {
+        this.title = title;
+        this.author = author;
+        this.genre = genre;
+        this.price = price;
+        this.description = description;
+        //this.quantity = quantity;
+        //this.users = users;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
     public String getTitle() {
         return title;
     }
