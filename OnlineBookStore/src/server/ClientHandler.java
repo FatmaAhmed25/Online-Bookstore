@@ -14,6 +14,8 @@ public class ClientHandler extends Thread {
     private final UserService userService;
     private final DatabaseService db;
     private final BookService bookService;
+    public static String clientUsername;
+
 
 
     public ClientHandler(Socket clientSocket) {
@@ -28,41 +30,53 @@ public class ClientHandler extends Thread {
     @Override
     public void run() {
 
+
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
              PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
+            boolean exit=false;
+            while(!exit){
             // Read the request from the client
             String request = reader.readLine();
+            if(request=="exit")
+                exit=true;
+            System.out.println(request);
+            // Split the data string using ":" as the delimiter
+            String[] parts = request.split(":");
+            System.out.println("hi"+parts[0]);
+
 
             // Handle login or registration based on the request
-            switch (request) {
+            switch (parts[0]) {
                 case "login":
-                    handleLogin(reader, writer);
+                    handleLogin(writer,request);
                     break;
                 case "register":
-                    handleRegistration(reader, writer);
+                    handleRegistration(writer,request);
                     break;
                 case "add":
-                    handleAddBook(reader, writer);
+                    System.out.println("hiii");
+                    handleAddBook(writer,request);
                     break;
                 case "remove":
-                    handleRemoveBook(reader, writer);
+                    handleRemoveBook( writer,request);
                     break;
                 default:
                     writer.println("Invalid request");
                     break;
             }
-        } catch (IOException e) {
+        } }catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void handleLogin(BufferedReader reader, PrintWriter writer) throws IOException {
+    private void handleLogin(PrintWriter writer,String data) throws IOException {
         try {
             // Read username and password from the client
-            String username = reader.readLine();
-            String password = reader.readLine();
-
+            String[] parts = data.split(":");
+            String username = parts[1];
+            String password = parts[2];
+            clientUsername=username;
             // Authenticate the user
             // Check if the user exists
             User user = userService.getUser(username);
@@ -86,12 +100,13 @@ public class ClientHandler extends Thread {
         }
     }
 
-    private void handleRegistration(BufferedReader reader, PrintWriter writer) throws IOException {
+    private void handleRegistration(PrintWriter writer,String data) throws IOException {
         try {
             // Read user details from the client
-            String name = reader.readLine();
-            String username = reader.readLine();
-            String password = reader.readLine();
+            String[] parts = data.split(":");
+            String name = parts[1];
+            String username = parts[2];
+            String password = parts[3];
 
             System.out.println("Received registration request for: Name=" + name + ", Username=" + username);
 
@@ -114,29 +129,49 @@ public class ClientHandler extends Thread {
             throw new RuntimeException(e);
         }
     }
-    private void handleAddBook(BufferedReader reader, PrintWriter writer) throws IOException {
-        System.out.println("hiii");
+    private void handleAddBook(PrintWriter writer,String data) throws IOException {
         try {
-            // Read book details from the client
-            String title = reader.readLine();
-            System.out.println(title);
-            String author = reader.readLine();
-            String genre = reader.readLine();
-            double price = Double.parseDouble(reader.readLine());
-            String description = reader.readLine();
-            int quantity = Integer.parseInt(reader.readLine());
-            String username= reader.readLine();
+            // Read the data string from the client
+            //String data = reader.readLine();
+            System.out.println(data);
 
-            int userID= userService.getUser(username).getId();
+            // Split the data string using ":" as the delimiter
+            String[] parts = data.split(":");
 
-            Book book = new Book(title, author, genre, price,description,userID,quantity);
-            // Call the DatabaseService method to add the book
-            // Modify the DatabaseService class to include a method for adding books
-            bookService.addBook(book);
+            // Check if the data contains all necessary parts
+            if (parts.length == 7)
+            {
+                String title = parts[1];
+                System.out.println(title);
+                String author = parts[2];
+                System.out.println(author);
+                String genre = parts[3];
+                System.out.println(genre);
+                double price = Double.parseDouble(parts[4]);
+                System.out.println(price);
+                String description = parts[5];
+                System.out.println(description);
+                int quantity = Integer.parseInt(parts[6]);
+                System.out.println(quantity);
 
-            writer.println("Book added successfully");
-        }
-        catch (SQLException e) {
+
+                // Fetch userID from userService based on the username
+                //System.out.println(username);
+                int userID = userService.getUser(clientUsername).getId();
+
+                // Create a Book object
+                Book book = new Book(title, author, genre, price, description, userID, quantity);
+
+                // Call the BookService method to add the book
+                bookService.addBook(book);
+
+                // Send success response to the client
+                writer.println("Book added successfully");
+            } else {
+                // If the data does not contain all necessary parts, send an error response to the client
+                writer.println("Error: Incomplete data received");
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
             writer.println("Error occurred while adding the book");
         } catch (Exception e) {
@@ -144,9 +179,12 @@ public class ClientHandler extends Thread {
         }
     }
 
-    private void handleRemoveBook(BufferedReader reader, PrintWriter writer) throws IOException {
+
+    //check if the book belongs to the loggedin user
+    private void handleRemoveBook(PrintWriter writer,String data) throws IOException {
         // Read book title from the client
-        int bookId = Integer.parseInt(reader.readLine());
+        String[] parts = data.split(":");
+        int bookId = Integer.parseInt(parts[1]);
 
         // Call the DatabaseService method to remove the book
         // Modify the DatabaseService class to include a method for removing books
