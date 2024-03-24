@@ -126,6 +126,9 @@ public class BookStoreClient {
         String description = consoleInput.readLine();
         System.out.print("Quantity: ");
         int quantity = Integer.parseInt(consoleInput.readLine());
+        System.out.println("username:");
+        String username = consoleInput.readLine();
+
 
         // Send book details to server
         writer.println(title);
@@ -134,6 +137,7 @@ public class BookStoreClient {
         writer.println(price);
         writer.println(description);
         writer.println(quantity);
+        writer.println(username);
 
         // Receive response from server
         String response = reader.readLine();
