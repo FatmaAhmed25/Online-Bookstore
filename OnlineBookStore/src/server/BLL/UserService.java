@@ -1,23 +1,20 @@
-package server.service;
+package server.BLL;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.sql.*;
-import java.util.Properties;
 
+import server.DAL.UserDAL;
 import server.model.Book;
 import server.model.User;
+
 public class UserService {
-    private DatabaseService databaseService;
-    public UserService(DatabaseService databaseService) {
-        this.databaseService = databaseService;
-    }
+    UserDAL userDB = new UserDAL();
+
     public  void registerUser(String name, String username, String password) throws Exception {
-        databaseService.addUser(name, username, password);
+        userDB.addUser(name, username, password);
     }
 
     public  User getUser(String username) throws SQLException {
-        return databaseService.getUser(username);
+        return userDB.getUser(username);
     }
 
     public  boolean authenticateUser(String username, String password) throws SQLException {
@@ -29,9 +26,7 @@ public class UserService {
         User user = getUser(username);
         return user != null;
     }
-    public  void addBook(Book book) throws SQLException {
-        databaseService.addBook(book);
-    }
+
 
 }
 

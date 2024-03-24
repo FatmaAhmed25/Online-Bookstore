@@ -1,8 +1,9 @@
 package server;
 
+import server.BLL.BookService;
 import server.model.Book;
-import server.service.DatabaseService;
-import server.service.UserService;
+import server.BLL.DatabaseService;
+import server.BLL.UserService;
 import server.model.User;
 import java.io.*;
 import java.net.Socket;
@@ -12,17 +13,21 @@ public class ClientHandler extends Thread {
     private final Socket clientSocket;
     private final UserService userService;
     private final DatabaseService db;
-
+    private final BookService bookService;
 
 
     public ClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
         this.db = new DatabaseService();
-        this.userService = new UserService(db);
+        this.userService = new UserService();
+        this.bookService=new BookService();
+
     }
+
 
     @Override
     public void run() {
+
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
              PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
@@ -119,12 +124,15 @@ public class ClientHandler extends Thread {
             String genre = reader.readLine();
             double price = Double.parseDouble(reader.readLine());
             String description = reader.readLine();
+            int quantity = Integer.parseInt(reader.readLine());
+            String username= reader.readLine();
 
+            int userID= userService.getUser(username).getId();
 
-            Book book = new Book(title, author, genre, price,description);
+            Book book = new Book(title, author, genre, price,description,userID,quantity);
             // Call the DatabaseService method to add the book
             // Modify the DatabaseService class to include a method for adding books
-            userService.addBook(book);
+            bookService.addBook(book);
 
             writer.println("Book added successfully");
         }
@@ -142,7 +150,7 @@ public class ClientHandler extends Thread {
 
         // Call the DatabaseService method to remove the book
         // Modify the DatabaseService class to include a method for removing books
-        DatabaseService.removeBook(bookId);
+        bookService.removeBook(bookId);
 
         writer.println("Book removed successfully");
     }

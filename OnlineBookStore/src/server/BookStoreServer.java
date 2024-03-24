@@ -1,6 +1,6 @@
 package server;
 
-import server.service.DatabaseService;
+import server.BLL.DatabaseService;
 
 import java.io.*;
 import java.net.ServerSocket;

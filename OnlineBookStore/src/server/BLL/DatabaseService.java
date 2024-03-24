@@ -1,4 +1,4 @@
-package server.service;
+package server.BLL;
 import server.model.Book;
 import server.model.User;
 
@@ -42,6 +42,7 @@ public class DatabaseService {
                     "title VARCHAR(255)," +
                     "author VARCHAR(255)," +
                     "genre VARCHAR(255)," +
+                    "description VARCHAR(255)," +
                     "price DOUBLE," +
                     "quantity INT," +
                     "owner_id INT," +  // ID of the owner
@@ -56,57 +57,6 @@ public class DatabaseService {
                     "FOREIGN KEY (user_id) REFERENCES Users(id)," +
                     "PRIMARY KEY (book_id, user_id))";  // Composite primary key to ensure uniqueness
             stmt.execute(createLentBooksTableSQL);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void addUser(String name, String username, String password) throws SQLException {
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO Users(name, username, password) VALUES (?, ?, ?)")) {
-            pstmt.setString(1, name);
-            pstmt.setString(2, username);
-            pstmt.setString(3, password);
-            pstmt.executeUpdate();
-        }
-    }
-    public User getUser(String username) throws SQLException {
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Users WHERE username = ?")) {
-            pstmt.setString(1, username);
-            try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return new User(rs.getString("name"), rs.getString("username"), rs.getString("password"));
-                }
-            }
-        }
-        return null;
-    }
-    public void addBookToDatabase(Book book) throws SQLException {
-        String addBookSQL = "INSERT INTO Books (title, author, genre, quantity, price, owner_id,description) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(addBookSQL)) {
-            pstmt.setString(1, book.getTitle());
-            pstmt.setString(2, book.getAuthor());
-            pstmt.setString(3, book.getGenre());
-            pstmt.setInt(4, book.getQuantity());
-            pstmt.setDouble(5, book.getPrice());
-            pstmt.setInt(6, book.getOwnerID());
-            pstmt.setString(7, book.getDescription());
-
-            pstmt.executeUpdate();
-            System.out.println("Book added to the database.");
-        } catch (SQLException e) {
-            System.out.println("Error adding book to the database: " + e.getMessage());
-            throw e;
-        }
-    }
-    public static void removeBook(int bookId) {
-        try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Book WHERE id = ?")) {
-            pstmt.setInt(1, bookId);
-            pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
