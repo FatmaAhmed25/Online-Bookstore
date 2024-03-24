@@ -2,7 +2,6 @@ package client;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.Scanner;
 
 public class BookStoreClient {
     private static final String SERVER_HOST = "localhost";
@@ -21,50 +20,29 @@ public class BookStoreClient {
             String action = consoleInput.readLine();
             writer.println(action);
 
-            // Handle login or registration based on user action
-            if (action.equalsIgnoreCase("login")) {
-                // Prompt user for username and password
-                System.out.println("Enter username:");
-                String username = consoleInput.readLine();
-                System.out.println("Enter password:");
-                String password = consoleInput.readLine();
-                // Send username to server
-                writer.println(username);
-                // Send password to server
-                writer.println(password);
-                String response = reader.readLine();
-                System.out.println("Server response: " + response);
-                if (response.contains("2")) {
-                    System.out.println("You are now logged in.");
-                    loggedInActions(consoleInput,username);
-                }
-            } else if (action.equalsIgnoreCase("register")) {
-                // Prompt user for username and password
-                System.out.println("Enter name:");
-                String name = consoleInput.readLine();
-                System.out.println("Enter username:");
-                String username = consoleInput.readLine();
-                System.out.println("Enter password:");
-                String password = consoleInput.readLine();
-                // Send username to server
-                writer.println(name);
-                writer.println(username);
-                // Send password to server
-                writer.println(password);
-                // Receive response from server
-                String response = reader.readLine();
-                System.out.println("Server response: " + response);
-
-            } else {
-                System.out.println("Invalid action. Please enter 'login' or 'register'.");
+            switch (action.toLowerCase()) {
+                case "login":
+                    handleLogin(consoleInput, writer, reader);
+                    break;
+                case "register":
+                    handleRegistration(consoleInput, writer, reader);
+                    break;
+                case "add":
+                    handleAddBook(consoleInput, writer, reader);
+                    break;
+                case "remove":
+                    handleRemoveBook(consoleInput, writer, reader);
+                    break;
+                default:
+                    System.out.println("Invalid action. Please enter 'login', 'register', 'add', or 'remove'.");
+                    break;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
-    public static void loggedInActions(BufferedReader consoleInput,String username) {
+    public static void loggedInActions(BufferedReader consoleInput, String username) {
         try {
             // Sub-menu options after logging in
             System.out.println("Actions:");
@@ -78,7 +56,7 @@ public class BookStoreClient {
 
             switch (loggedInChoice) {
                 case 1:
-                    addBookToStore(consoleInput,username);
+                    //handleAddBook(consoleInput, username,);
                     break;
                 case 2:
                     // Implement search for a book functionality
@@ -97,22 +75,81 @@ public class BookStoreClient {
         }
     }
 
-    public static void addBookToStore(BufferedReader consoleInput,String username) {
-        try {
-            System.out.println("Enter book details:");
-            System.out.print("Title: ");
-            String title = consoleInput.readLine();
-            System.out.print("Author: ");
-            String author = consoleInput.readLine();
-            System.out.print("Genre: ");
-            String genre = consoleInput.readLine();
-            System.out.print("Quantity: ");
-            int quantity = Integer.parseInt(consoleInput.readLine());
-            System.out.print("Price: ");
-            double price = Double.parseDouble(consoleInput.readLine());
-            System.out.println("Book added to the store: " + title + " by " + author + " ,Genre is " + genre);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+    private static void handleLogin(BufferedReader consoleInput, PrintWriter writer, BufferedReader reader) throws IOException {
+        // Prompt user for username and password
+        System.out.println("Enter username:");
+        String username = consoleInput.readLine();
+        System.out.println("Enter password:");
+        String password = consoleInput.readLine();
+        // Send username to server
+        writer.println(username);
+        // Send password to server
+        writer.println(password);
+        String response = reader.readLine();
+        System.out.println("Server response: " + response);
+        if (response.contains("2")) {
+            System.out.println("You are now logged in.");
+            loggedInActions(consoleInput, username);
         }
     }
+
+    private static void handleRegistration(BufferedReader consoleInput, PrintWriter writer, BufferedReader reader) throws IOException {
+        // Prompt user for registration details
+        System.out.println("Enter name:");
+        String name = consoleInput.readLine();
+        System.out.println("Enter username:");
+        String username = consoleInput.readLine();
+        System.out.println("Enter password:");
+        String password = consoleInput.readLine();
+
+        // Send registration details to server
+        writer.println(name);
+        writer.println(username);
+        writer.println(password);
+
+        // Receive response from server
+        String response = reader.readLine();
+        System.out.println("Server response: " + response);
+    }
+
+    private static void handleAddBook(BufferedReader consoleInput, PrintWriter writer, BufferedReader reader) throws IOException {
+        // Prompt user for book details
+        System.out.println("Enter book title:");
+        String title = consoleInput.readLine();
+        System.out.println("Enter author:");
+        String author = consoleInput.readLine();
+        System.out.println("Enter genre:");
+        String genre = consoleInput.readLine();
+        System.out.println("Enter price:");
+        double price = Double.parseDouble(consoleInput.readLine());
+        System.out.println("Enter description:");
+        String description = consoleInput.readLine();
+        System.out.print("Quantity: ");
+        int quantity = Integer.parseInt(consoleInput.readLine());
+
+        // Send book details to server
+        writer.println(title);
+        writer.println(author);
+        writer.println(genre);
+        writer.println(price);
+        writer.println(description);
+        writer.println(quantity);
+
+        // Receive response from server
+        String response = reader.readLine();
+        System.out.println("Server response: " + response);
+    }
+private static void handleRemoveBook(BufferedReader consoleInput, PrintWriter writer, BufferedReader reader) throws IOException {
+        // Prompt user for book ID
+        System.out.println("Enter book ID to remove:");
+        int bookId = Integer.parseInt(consoleInput.readLine());
+
+        // Send book ID to server
+        writer.println(bookId);
+
+        // Receive response from server
+        String response = reader.readLine();
+        System.out.println("Server response: " + response);
+        }
+
 }

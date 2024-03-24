@@ -1,4 +1,5 @@
 package server.service;
+import server.model.Book;
 import server.model.User;
 
 import java.io.FileInputStream;
@@ -81,22 +82,33 @@ public class DatabaseService {
         }
         return null;
     }
-    public void addBookToDatabase(Connection conn, String title, String author, String genre, int quantity, double price, int ownerId) throws SQLException {
-        String addBookSQL = "INSERT INTO Books (title, author, genre, quantity, price, owner_id) VALUES (?, ?, ?, ?, ?, ?)";
+    public void addBookToDatabase(Book book) throws SQLException {
+        String addBookSQL = "INSERT INTO Books (title, author, genre, quantity, price, owner_id,description) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement pstmt = conn.prepareStatement(addBookSQL)) {
-            pstmt.setString(1, title);
-            pstmt.setString(2, author);
-            pstmt.setString(3, genre);
-            pstmt.setInt(4, quantity);
-            pstmt.setDouble(5, price);
-            pstmt.setInt(6, ownerId);
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(addBookSQL)) {
+            pstmt.setString(1, book.getTitle());
+            pstmt.setString(2, book.getAuthor());
+            pstmt.setString(3, book.getGenre());
+            pstmt.setInt(4, book.getQuantity());
+            pstmt.setDouble(5, book.getPrice());
+            pstmt.setInt(6, book.getOwnerID());
+            pstmt.setString(7, book.getDescription());
 
             pstmt.executeUpdate();
             System.out.println("Book added to the database.");
         } catch (SQLException e) {
             System.out.println("Error adding book to the database: " + e.getMessage());
             throw e;
+        }
+    }
+    public static void removeBook(int bookId) {
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Book WHERE id = ?")) {
+            pstmt.setInt(1, bookId);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -1,5 +1,6 @@
 package server.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Book {
@@ -8,10 +9,25 @@ public class Book {
     private String genre; // can be enum
     private double price;
     private int quantity;
-    private User owner;
+    private String description;
+    private int ownerID;
     private List<User> lentBy;
     public String getTitle() {
         return title;
+    }
+    public Book(String title, String author, String genre, double price, String description,int ownerID,int quantity) {
+        this.title = title;
+        this.author = author;
+        this.genre = genre;
+        this.price = price;
+        this.description = description;
+        this.quantity = quantity;
+        this.ownerID = ownerID;
+        this.lentBy=new ArrayList<>();
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public void setTitle(String title) {
@@ -58,12 +74,12 @@ public class Book {
         this.lentBy.add(user);
     }
 
-    public User getOwner() {
-        return owner;
+    public int getOwnerID() {
+        return ownerID;
     }
 
-    public void setOwner(User owner) {
-        this.owner = owner;
+    public void setOwner(int ownerID) {
+        this.ownerID = ownerID;
     }
 
     @Override
