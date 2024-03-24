@@ -3,7 +3,6 @@ import server.model.Book;
 import server.model.User;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.*;
 import java.util.Properties;
@@ -38,15 +37,25 @@ public class DatabaseService {
                     "username VARCHAR(255) UNIQUE," +
                     "password VARCHAR(255))";
             stmt.execute(createUserTableSQL);
-            // SQL query to create the Book table
-            String createBookTableSQL = "CREATE TABLE IF NOT EXISTS Book (" +
+            String createBooksTableSQL = "CREATE TABLE IF NOT EXISTS Books (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
                     "title VARCHAR(255)," +
                     "author VARCHAR(255)," +
                     "genre VARCHAR(255)," +
-                    "price DECIMAL(10, 2)," +
-                    "description VARCHAR(255))";
-            stmt.execute(createBookTableSQL);
+                    "price DOUBLE," +
+                    "quantity INT," +
+                    "owner_id INT," +  // ID of the owner
+                    "FOREIGN KEY (owner_id) REFERENCES Users(id))";  //Foreign key constraint for owner_id
+            stmt.execute(createBooksTableSQL);
+
+            //many-to-many relationship between users and books (lentBy relationship)
+            String createLentBooksTableSQL = "CREATE TABLE IF NOT EXISTS LentBooks (" +
+                    "book_id INT," +
+                    "user_id INT," +
+                    "FOREIGN KEY (book_id) REFERENCES Books(id)," +
+                    "FOREIGN KEY (user_id) REFERENCES Users(id)," +
+                    "PRIMARY KEY (book_id, user_id))";  // Composite primary key to ensure uniqueness
+            stmt.execute(createLentBooksTableSQL);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -73,26 +82,28 @@ public class DatabaseService {
         }
         return null;
     }
-    public  void addBook(Book book) {
+    public void addBookToDatabase(Book book) throws SQLException {
+        String addBookSQL = "INSERT INTO Books (title, author, genre, quantity, price, owner_id,description) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
-        System.out.println("hiii"+book);
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(
-                     "INSERT INTO Book (title, author, genre, price, description) VALUES (?, ?, ?, ?, ?)")) {
+             PreparedStatement pstmt = conn.prepareStatement(addBookSQL)) {
             pstmt.setString(1, book.getTitle());
             pstmt.setString(2, book.getAuthor());
             pstmt.setString(3, book.getGenre());
-            pstmt.setDouble(4, book.getPrice());
-            pstmt.setString(5, book.getDescription());
+            pstmt.setInt(4, book.getQuantity());
+            pstmt.setDouble(5, book.getPrice());
+            pstmt.setInt(6, book.getOwnerID());
+            pstmt.setString(7, book.getDescription());
 
             pstmt.executeUpdate();
+            System.out.println("Book added to the database.");
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Error adding book to the database: " + e.getMessage());
+            throw e;
         }
     }
-
     public static void removeBook(int bookId) {
-        try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+        try (Connection conn = getConnection();
              PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Book WHERE id = ?")) {
             pstmt.setInt(1, bookId);
             pstmt.executeUpdate();

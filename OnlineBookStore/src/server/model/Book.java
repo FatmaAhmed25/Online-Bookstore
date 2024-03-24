@@ -1,5 +1,6 @@
 package server.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Book {
@@ -7,26 +8,26 @@ public class Book {
     private String author;
     private String genre; // can be enum
     private double price;
+    private int quantity;
     private String description;
-    private int quantity; // can be queried
-    private List<User> users;
-
-    public Book(String title, String author, String genre, double price, String description) {
+    private int ownerID;
+    private List<User> lentBy;
+    public String getTitle() {
+        return title;
+    }
+    public Book(String title, String author, String genre, double price, String description,int ownerID,int quantity) {
         this.title = title;
         this.author = author;
         this.genre = genre;
         this.price = price;
         this.description = description;
-        //this.quantity = quantity;
-        //this.users = users;
+        this.quantity = quantity;
+        this.ownerID = ownerID;
+        this.lentBy=new ArrayList<>();
     }
 
     public String getDescription() {
         return description;
-    }
-
-    public String getTitle() {
-        return title;
     }
 
     public void setTitle(String title) {
@@ -65,12 +66,20 @@ public class Book {
     public void setQuantity(int quantity) {
         this.quantity = quantity;
     }
-    public List<User> getUsers() {
-        return users;
+    public List<User> getLentBy() {
+        return lentBy;
     }
 
     public void addUser(User user) {
-        this.users.add(user);
+        this.lentBy.add(user);
+    }
+
+    public int getOwnerID() {
+        return ownerID;
+    }
+
+    public void setOwner(int ownerID) {
+        this.ownerID = ownerID;
     }
 
     @Override
@@ -81,7 +90,7 @@ public class Book {
                 ", genre='" + genre + '\'' +
                 ", price='" + price +'\''+
                 ", quantity='" + quantity +'\''+
-                ", users =" + users +
+                ", users =" + lentBy +
                 '}';
     }
 }
