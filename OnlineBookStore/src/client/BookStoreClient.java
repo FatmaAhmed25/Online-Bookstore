@@ -6,60 +6,94 @@ import java.net.Socket;
 public class BookStoreClient {
     private static final String SERVER_HOST = "localhost";
     private static final int SERVER_PORT = 12345;
+    public static String username1;
+
+    static Socket socket;
+
+    static {
+        try {
+            socket = new Socket(SERVER_HOST, SERVER_PORT);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static BufferedReader reader;
+
+    static {
+        try {
+            reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static PrintWriter writer;
+
+    static {
+        try {
+            writer = new PrintWriter(socket.getOutputStream(), true);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in));
+
+    public BookStoreClient() throws IOException {
+    }
 
     public static void main(String[] args) {
-        try (Socket socket = new Socket(SERVER_HOST, SERVER_PORT);
-             BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-             PrintWriter writer = new PrintWriter(socket.getOutputStream(), true);
-             BufferedReader consoleInput = new BufferedReader(new InputStreamReader(System.in))) {
+        try
+        {
 
             System.out.println("Connected to server: " + SERVER_HOST + ":" + SERVER_PORT);
 
             // Prompt user for action (login or register)
             System.out.println("Enter 'login' or 'register':");
+            while(true){
             String action = consoleInput.readLine();
-            writer.println(action);
+           // writer.println(action);
+
 
             switch (action.toLowerCase()) {
                 case "login":
                     handleLogin(consoleInput, writer, reader);
+
                     break;
                 case "register":
                     handleRegistration(consoleInput, writer, reader);
                     break;
-                case "add":
-                    handleAddBook(consoleInput, writer, reader);
-                    break;
-                case "remove":
-                    handleRemoveBook(consoleInput, writer, reader);
-                    break;
+
                 default:
-                    System.out.println("Invalid action. Please enter 'login', 'register', 'add', or 'remove'.");
+                    System.out.println("Invalid action. Please enter 'login', 'register'");
                     break;
             }
-        } catch (IOException e) {
+        } }catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static void loggedInActions(BufferedReader consoleInput, String username) {
+    public static void loggedInActions(String username) {
         try {
+
             // Sub-menu options after logging in
             System.out.println("Actions:");
             System.out.println("1. Add book to store");
-            System.out.println("2. Search for a book");
-            System.out.println("3. See my request history");
-            System.out.println("4. Open messages");
-            System.out.println("5.Logout");
+            System.out.println("2. Remove book from store");
+            System.out.println("3. Search for a book");
+            System.out.println("4. See my request history");
+            System.out.println("5. Open messages");
+            System.out.println("6.Logout");
             System.out.print("Choose an action: ");
             int loggedInChoice = Integer.parseInt(consoleInput.readLine());
 
             switch (loggedInChoice) {
                 case 1:
-                    //handleAddBook(consoleInput, username,);
+                    handleAddBook(consoleInput,writer,reader);
                     break;
                 case 2:
-                    // Implement search for a book functionality
+                    handleRemoveBook(consoleInput,writer,reader);
                     break;
                 case 3:
                     // Implement see my request history functionality
@@ -79,17 +113,16 @@ public class BookStoreClient {
         // Prompt user for username and password
         System.out.println("Enter username:");
         String username = consoleInput.readLine();
+        username1=username;
         System.out.println("Enter password:");
         String password = consoleInput.readLine();
-        // Send username to server
-        writer.println(username);
-        // Send password to server
-        writer.println(password);
+        writer.println("login"+":"+username+":"+password);
+
         String response = reader.readLine();
         System.out.println("Server response: " + response);
         if (response.contains("2")) {
             System.out.println("You are now logged in.");
-            loggedInActions(consoleInput, username);
+            loggedInActions(username);
         }
     }
 
@@ -101,11 +134,9 @@ public class BookStoreClient {
         String username = consoleInput.readLine();
         System.out.println("Enter password:");
         String password = consoleInput.readLine();
+        writer.println("register"+":"+name+":"+username+":"+password);
 
-        // Send registration details to server
-        writer.println(name);
-        writer.println(username);
-        writer.println(password);
+
 
         // Receive response from server
         String response = reader.readLine();
@@ -126,18 +157,18 @@ public class BookStoreClient {
         String description = consoleInput.readLine();
         System.out.print("Quantity: ");
         int quantity = Integer.parseInt(consoleInput.readLine());
-        System.out.println("username:");
-        String username = consoleInput.readLine();
+
 
 
         // Send book details to server
-        writer.println(title);
-        writer.println(author);
-        writer.println(genre);
-        writer.println(price);
-        writer.println(description);
-        writer.println(quantity);
-        writer.println(username);
+//        writer.println(title);
+//        writer.println(author);
+//        writer.println(genre);
+//        writer.println(price);
+//        writer.println(description);
+//        writer.println(quantity);
+//        writer.println(username);
+        writer.println("add"+":"+title+":"+author+":"+genre+":"+price+":"+description+":"+quantity);
 
         // Receive response from server
         String response = reader.readLine();
@@ -149,7 +180,7 @@ private static void handleRemoveBook(BufferedReader consoleInput, PrintWriter wr
         int bookId = Integer.parseInt(consoleInput.readLine());
 
         // Send book ID to server
-        writer.println(bookId);
+        writer.println("remove"+":"+bookId);
 
         // Receive response from server
         String response = reader.readLine();

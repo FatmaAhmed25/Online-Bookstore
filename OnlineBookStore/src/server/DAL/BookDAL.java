@@ -30,7 +30,7 @@ public class BookDAL {
     }
     public void removeBook(int bookId) {
         try (Connection conn = DatabaseService.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Book WHERE id = ?")) {
+             PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Books WHERE id = ?")) {
             pstmt.setInt(1, bookId);
             pstmt.executeUpdate();
         } catch (SQLException e) {
