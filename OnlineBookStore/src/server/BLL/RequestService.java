@@ -12,8 +12,11 @@ public class RequestService {
     public void addRequest(Request request) throws SQLException {
         requestDB.addRequest(request);
     }
-    public List<Request> getPendingRequestsForUser(int lenderId) {
-        return requestDB.getPendingRequestsForUser(lenderId);
+    public List<Request> getPendingRequestsForLender(int lenderId) {
+        return requestDB.getPendingRequestsForLender(lenderId);
+    }
+    public List<Request> getAcceptedRequestsForRequester(int requesterId) {
+        return requestDB.getAcceptedRequestsForRequester(requesterId);
     }
     public List<Request> getAllRequestsForUser(int lenderId)
     {

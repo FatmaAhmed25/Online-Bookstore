@@ -21,8 +21,6 @@ public class RequestDAL {
             pstmt.setInt(1, request.getBorrowerId());
             pstmt.setInt(2, request.getLenderId());
             pstmt.setInt(3, request.getBookId());
-
-
             pstmt.executeUpdate();
             System.out.println("Request added to the database.");
         } catch (SQLException e) {
@@ -32,7 +30,7 @@ public class RequestDAL {
     }
 
     // Get pending borrowing requests for a specific user
-    public List<Request> getPendingRequestsForUser(int userId) {
+    public List<Request> getPendingRequestsForLender(int userId) {
         List<Request> pendingRequests = new ArrayList<>();
         String getPendingRequestsSQL = "SELECT * FROM Requests WHERE lender_id = ? AND status = 'Pending'";
 
@@ -44,7 +42,7 @@ public class RequestDAL {
                     int id = rs.getInt("id");
                     int borrowerId = rs.getInt("borrower_id");
                     int bookId = rs.getInt("book_id");
-                    String status = rs.getString("status");
+                    //String status = rs.getString("status");
 
                     pendingRequests.add(new Request(borrowerId, userId, bookId));
                 }
@@ -53,6 +51,34 @@ public class RequestDAL {
             e.printStackTrace();
         }
         return pendingRequests;
+    }
+    public List<Request> getAcceptedRequestsForRequester(int userId) {
+        List<Request> AcceptedRequests = new ArrayList<>();
+        String getPendingRequestsSQL = "SELECT * FROM Requests WHERE borrower_id = ? AND status = 'Accepted'";
+
+        try (Connection conn = DatabaseService.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(getPendingRequestsSQL)) {
+            pstmt.setInt(1, userId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    int borrowerId = rs.getInt("borrower_id");
+                    int bookId = rs.getInt("book_id");
+                    //String status = rs.getString("status");
+                    Request request=new Request(borrowerId, userId, bookId);
+                    request.setId(id);
+                    AcceptedRequests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println("here");
+        for(int i=0;i<AcceptedRequests.size();i++)
+        {
+            System.out.println(AcceptedRequests.get(i));
+        }
+        return AcceptedRequests;
     }
 
     // Get all borrowing requests for a specific user
