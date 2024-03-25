@@ -8,13 +8,16 @@ import server.model.User;
 import java.io.*;
 import java.net.Socket;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class ClientHandler extends Thread {
     private final Socket clientSocket;
     private final UserService userService;
     private final DatabaseService db;
     private final BookService bookService;
-    public static String clientUsername;
+   // public static String clientUsername;
+    public static User loggedInUser;
 
 
 
@@ -29,8 +32,6 @@ public class ClientHandler extends Thread {
 
     @Override
     public void run() {
-
-
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
              PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
 
@@ -61,6 +62,10 @@ public class ClientHandler extends Thread {
                 case "remove":
                     handleRemoveBook( writer,request);
                     break;
+                case "search":
+                    handleGetBooks( writer,request);
+                    //handleGettBooks(writer,request);
+                    break;
                 default:
                     writer.println("Invalid request");
                     break;
@@ -76,7 +81,7 @@ public class ClientHandler extends Thread {
             String[] parts = data.split(":");
             String username = parts[1];
             String password = parts[2];
-            clientUsername=username;
+            //clientUsername=username;
             // Authenticate the user
             // Check if the user exists
             User user = userService.getUser(username);
@@ -94,6 +99,7 @@ public class ClientHandler extends Thread {
             }
 
             writer.println("200 Login successful");
+            loggedInUser=user;
         } catch (SQLException e) {
             e.printStackTrace();
             writer.println("Error occurred during login");
@@ -157,7 +163,7 @@ public class ClientHandler extends Thread {
 
                 // Fetch userID from userService based on the username
                 //System.out.println(username);
-                int userID = userService.getUser(clientUsername).getId();
+                int userID = userService.getUser(loggedInUser.getUsername()).getId();
 
                 // Create a Book object
                 Book book = new Book(title, author, genre, price, description, userID, quantity);
@@ -188,9 +194,63 @@ public class ClientHandler extends Thread {
 
         // Call the DatabaseService method to remove the book
         // Modify the DatabaseService class to include a method for removing books
-        bookService.removeBook(bookId);
+        if(bookService.removeBook(bookId,loggedInUser.getId())){
+            writer.println("Book removed successfully");
+        }
+        else {
+            writer.println("Authorization error");
+        }
 
-        writer.println("Book removed successfully");
+
+    }
+    private void handleGetBooks(PrintWriter writer,String data) throws IOException {
+        // Read book title from the client
+        String[] parts = data.split(":");
+        String category=parts[1];
+        String searchKey=parts[2];
+
+
+        // Call the DatabaseService method to remove the book
+        // Modify the DatabaseService class to include a method for removing books
+        if(Objects.equals(category, "title")) {
+            ArrayList<Book> books = bookService.getBooksByTitle(searchKey);
+            String res = "";
+            for (int i = 0; i < books.size(); i++)
+            {
+                res += books.get(i);
+                res+="\n";
+            }
+            res += "end";
+            System.out.println("ho"+res);
+            writer.println(res);
+        }
+        else if (Objects.equals(category, "author"))
+        {
+            ArrayList<Book> books = bookService.getBooksByAuthor(searchKey);
+            String res = "";
+            for (int i = 0; i < books.size(); i++)
+            {
+                res += books.get(i);
+                res+="\n";
+            }
+            res += "end";
+            System.out.println("ho"+res);
+            writer.println(res);
+        }
+
+        else if(Objects.equals(category, "genre"))
+        {
+            ArrayList<Book> books = bookService.getBooksByGenre(searchKey);
+            String res = "";
+            for (int i = 0; i < books.size(); i++)
+            {
+                res += books.get(i);
+                res+="\n";
+            }
+            res += "end";
+            System.out.println("ho"+res);
+            writer.println(res);
+        }
     }
 
 
