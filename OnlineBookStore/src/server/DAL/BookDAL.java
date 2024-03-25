@@ -11,7 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class BookDAL {
-    public void addBook(Book book) throws SQLException {
+    public  synchronized  void addBook(Book book) throws SQLException {
         String addBookSQL = "INSERT INTO Books (title, author, genre, quantity, price, owner_id,description) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseService.getConnection();
@@ -32,7 +32,7 @@ public class BookDAL {
         }
     }
 
-    public void removeBook(int bookId) {
+    public  synchronized  void removeBook(int bookId) {
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Books WHERE id = ?")) {
             pstmt.setInt(1, bookId);
@@ -42,7 +42,7 @@ public class BookDAL {
         }
     }
 
-    public Book getBookByID(int bookId) {
+    public  synchronized  Book getBookByID(int bookId) {
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE id = ?")) {
             pstmt.setInt(1, bookId);
@@ -58,7 +58,7 @@ public class BookDAL {
 
     }
 
-    public ArrayList<Book> getBooksByTitle(String title) {
+    public  synchronized  ArrayList<Book> getBooksByTitle(String title) {
         ArrayList<Book> books = new ArrayList<>();
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE title = ?")) {
@@ -75,7 +75,7 @@ public class BookDAL {
 
     }
 
-    public ArrayList<Book> getBooksByAuthor(String author) {
+    public  synchronized  ArrayList<Book> getBooksByAuthor(String author) {
         ArrayList<Book> books = new ArrayList<>();
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE author = ?")) {
@@ -92,7 +92,7 @@ public class BookDAL {
 
     }
 
-    public ArrayList<Book> getBooksByGenre(String genre) {
+    public  synchronized  ArrayList<Book> getBooksByGenre(String genre) {
         ArrayList<Book> books = new ArrayList<>();
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE genre = ?")) {
@@ -110,7 +110,7 @@ public class BookDAL {
     }
 
 
-    public boolean bookBelongsToUser(int bookId, int lenderId) {
+    public  synchronized  boolean bookBelongsToUser(int bookId, int lenderId) {
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE owner_id = ? AND id= ?")) {
             pstmt.setInt(1, lenderId);

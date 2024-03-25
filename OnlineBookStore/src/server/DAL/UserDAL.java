@@ -9,7 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class UserDAL {
-    public void addUser(String name, String username, String password) throws SQLException {
+    public  synchronized void addUser(String name, String username, String password) throws SQLException {
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("INSERT INTO Users(name, username, password) VALUES (?, ?, ?)")) {
             pstmt.setString(1, name);
@@ -18,7 +18,7 @@ public class UserDAL {
             pstmt.executeUpdate();
         }
     }
-    public User getUser(String username) throws SQLException {
+    public  synchronized  User getUser(String username) throws SQLException {
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Users WHERE username = ?")) {
             pstmt.setString(1, username);

@@ -13,7 +13,7 @@ import java.util.List;
 public class RequestDAL {
 
     // Add a borrowing request to the database
-    public void addRequest(Request request) throws SQLException {
+    public  synchronized  void addRequest(Request request) throws SQLException {
         String addRequestSQL = "INSERT INTO Requests (borrower_id, lender_id, book_id, status) VALUES (?, ?, ?, 'pending')";
 
         try (Connection conn = DatabaseService.getConnection();
@@ -32,7 +32,7 @@ public class RequestDAL {
     }
 
     // Get pending borrowing requests for a specific user
-    public List<Request> getPendingRequestsForUser(int userId) {
+    public  synchronized  List<Request> getPendingRequestsForUser(int userId) {
         List<Request> pendingRequests = new ArrayList<>();
         String getPendingRequestsSQL = "SELECT * FROM Requests WHERE lender_id = ? AND status = 'Pending'";
 
@@ -56,7 +56,7 @@ public class RequestDAL {
     }
 
     // Get all borrowing requests for a specific user
-    public List<Request> getAllRequestsForUser(int userId) {
+    public  synchronized  List<Request> getAllRequestsForUser(int userId) {
         List<Request> allRequests = new ArrayList<>();
         String getAllRequestsSQL = "SELECT * FROM Requests WHERE lender_id = ? OR borrower_id = ?";
 
@@ -82,16 +82,16 @@ public class RequestDAL {
     }
 
     // Accept a borrowing request
-    public void acceptRequest(int requestId) {
+    public  synchronized  void acceptRequest(int requestId) {
         updateRequestStatus(requestId, "Accepted");
     }
 
     // Reject a borrowing request
-    public void rejectRequest(int requestId) {
+    public  synchronized  void rejectRequest(int requestId) {
         updateRequestStatus(requestId, "Rejected");
     }
 
-    private void updateRequestStatus(int requestId, String status) {
+    private  synchronized  void updateRequestStatus(int requestId, String status) {
         String updateRequestStatusSQL = "UPDATE Requests SET status = ? WHERE id = ?";
 
         try (Connection conn = DatabaseService.getConnection();

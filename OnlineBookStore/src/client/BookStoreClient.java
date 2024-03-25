@@ -136,6 +136,9 @@ public class BookStoreClient {
                 case 5:
                     //handleLendingResponse(writer, reader);
                     break;
+                case 7:
+                    handleMessages();
+                    break;
                 case 6:
                     loggedIn = false;
                     break;
@@ -238,6 +241,23 @@ private static void handleRemoveBook(BufferedReader consoleInput, PrintWriter wr
         // Receive response from server
         String response = reader.readLine();
         System.out.println("Server response: " + response);
+    }
+    private static void sendMessage(String recipient, String message) {
+        writer.println("msg:" + recipient + ":" + message);
+    }
+    private static void handleMessages() throws IOException {
+        while (true) {
+            System.out.println("Enter recipient username (or 'exit' to quit):");
+            String recipient = consoleInput.readLine();
+            if (recipient.equalsIgnoreCase("exit")) {
+                break;
+            }
+            System.out.println("Enter message:");
+            String message = consoleInput.readLine();
+            sendMessage(recipient, message);
+
+        }
+
     }
 
 
