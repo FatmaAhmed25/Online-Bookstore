@@ -50,33 +50,65 @@ public class BookStoreClient {
             System.out.println("Connected to server: " + SERVER_HOST + ":" + SERVER_PORT);
 
             // Prompt user for action (login or register)
-            System.out.println("Enter 'login' or 'register':");
+
             while(true){
-            String action = consoleInput.readLine();
-           // writer.println(action);
+                System.out.println("Enter 'login' or 'register':");
+                String action = consoleInput.readLine();
+               // writer.println(action);
 
 
-            switch (action.toLowerCase()) {
-                case "login":
-                    handleLogin(consoleInput, writer, reader);
+                switch (action.toLowerCase()) {
+                    case "login":
+                        handleLogin(consoleInput, writer, reader);
 
-                    break;
-                case "register":
-                    handleRegistration(consoleInput, writer, reader);
-                    break;
+                        break;
+                    case "register":
+                        handleRegistration(consoleInput, writer, reader);
+                        break;
 
-                default:
-                    System.out.println("Invalid action. Please enter 'login', 'register'");
-                    break;
+                    default:
+                        System.out.println("Invalid action. Please enter 'login', 'register'");
+                        break;
             }
         } }catch (IOException e) {
             e.printStackTrace();
         }
     }
+    public static void searchActions() throws IOException {
+        System.out.println("Search by:");
+        System.out.println("1. Search by title");
+        System.out.println("2. Search by author");
+        System.out.println("3. Search by genre");
+        System.out.println("4. Exit");
+        System.out.print("Choose an action: ");
+        int searchChoice = Integer.parseInt(consoleInput.readLine());
+        String res="";
+        switch (searchChoice) {
+            case 1:
+                System.out.println("Enter the title that you want to search for: ");
+                res= consoleInput.readLine();
+                handleSearchBooks(writer,reader,"title",res);
+                break;
+            case 2:
+                System.out.println("Enter the author that you want to search for: ");
+                res= consoleInput.readLine();
 
-    public static void loggedInActions(String username) {
+                handleSearchBooks(writer,reader,"author",res);
+                break;
+            case 3:
+                System.out.println("Enter the genre that you want to search for: ");
+                res= consoleInput.readLine();
+                handleSearchBooks(writer,reader,"genre",res);
+
+                break;
+
+        }
+    }
+    public static void loggedInActions() {
         try {
 
+            boolean loggedIn = true;
+            while (loggedIn) {
             // Sub-menu options after logging in
             System.out.println("Actions:");
             System.out.println("1. Add book to store");
@@ -96,15 +128,23 @@ public class BookStoreClient {
                     handleRemoveBook(consoleInput,writer,reader);
                     break;
                 case 3:
-                    // Implement see my request history functionality
+                    searchActions();
                     break;
                 case 4:
                     // Implement open messages functionality
                     break;
+                case 5:
+                    //
+                    break;
+                case 6:
+                    loggedIn = false;
+                    break;
+
                 default:
                     System.out.println("Invalid choice.");
             }
-        } catch (IOException e) {
+        } }
+        catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
@@ -122,7 +162,7 @@ public class BookStoreClient {
         System.out.println("Server response: " + response);
         if (response.contains("2")) {
             System.out.println("You are now logged in.");
-            loggedInActions(username);
+            loggedInActions();
         }
     }
 
@@ -158,16 +198,6 @@ public class BookStoreClient {
         System.out.print("Quantity: ");
         int quantity = Integer.parseInt(consoleInput.readLine());
 
-
-
-        // Send book details to server
-//        writer.println(title);
-//        writer.println(author);
-//        writer.println(genre);
-//        writer.println(price);
-//        writer.println(description);
-//        writer.println(quantity);
-//        writer.println(username);
         writer.println("add"+":"+title+":"+author+":"+genre+":"+price+":"+description+":"+quantity);
 
         // Receive response from server
@@ -187,4 +217,14 @@ private static void handleRemoveBook(BufferedReader consoleInput, PrintWriter wr
         System.out.println("Server response: " + response);
         }
 
+    private static void handleSearchBooks(PrintWriter writer1,BufferedReader reader1,String category,String res) throws IOException {
+        writer1.println("search"+":"+category+":"+res);
+        // Receive response from server
+        String response;
+        while (!(response = reader.readLine()).equals("end")) {
+            System.out.println("Server response: " + response);
+        }
+    }
+
 }
+
