@@ -26,6 +26,10 @@ public class BookService {
 
 
     }
+    public Book getBookByID(int bookID)
+    {
+        return bookDB.getBookByID(bookID);
+    }
 
     public void addBook(Book book) throws SQLException {
         bookDB.addBook(book);
@@ -61,5 +65,9 @@ public class BookService {
             System.out.println(books.get(i));
         }
         return books;
+    }
+
+    public boolean isBookBelongsToUser(int bookId, int lenderId) {
+        return bookDB.bookBelongsToUser(bookId,lenderId);
     }
 }
