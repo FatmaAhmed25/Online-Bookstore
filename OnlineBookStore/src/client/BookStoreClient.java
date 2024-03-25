@@ -131,10 +131,10 @@ public class BookStoreClient {
                     searchActions();
                     break;
                 case 4:
-                    // Implement open messages functionality
+                    handleBorrowRequest(writer, reader);
                     break;
                 case 5:
-                    //
+                    //handleLendingResponse(writer, reader);
                     break;
                 case 6:
                     loggedIn = false;
@@ -225,6 +225,22 @@ private static void handleRemoveBook(BufferedReader consoleInput, PrintWriter wr
             System.out.println("Server response: " + response);
         }
     }
+    private static void handleBorrowRequest(PrintWriter writer, BufferedReader reader) throws IOException {
+        // Prompt user for book ID and lender's username
+        System.out.println("Enter book ID you want to borrow:");
+        int bookId = Integer.parseInt(consoleInput.readLine());
+//        System.out.println("Enter lender's username:");
+//        String lenderUsername = consoleInput.readLine();
+
+        // Send borrowing request to server
+        writer.println("borrow:" + bookId );
+
+        // Receive response from server
+        String response = reader.readLine();
+        System.out.println("Server response: " + response);
+    }
+
+
 
 }
 

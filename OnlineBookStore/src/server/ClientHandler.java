@@ -1,9 +1,11 @@
 package server;
 
 import server.BLL.BookService;
+import server.BLL.RequestService;
 import server.model.Book;
 import server.BLL.DatabaseService;
 import server.BLL.UserService;
+import server.model.Request;
 import server.model.User;
 import java.io.*;
 import java.net.Socket;
@@ -14,6 +16,7 @@ import java.util.Objects;
 public class ClientHandler extends Thread {
     private final Socket clientSocket;
     private final UserService userService;
+    private final RequestService requestService;
     private final DatabaseService db;
     private final BookService bookService;
    // public static String clientUsername;
@@ -23,6 +26,7 @@ public class ClientHandler extends Thread {
 
     public ClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
+        this.requestService =new RequestService();
         this.db = new DatabaseService();
         this.userService = new UserService();
         this.bookService=new BookService();
@@ -66,6 +70,10 @@ public class ClientHandler extends Thread {
                     handleGetBooks( writer,request);
                     //handleGettBooks(writer,request);
                     break;
+                case "borrow":
+                    handleBorrowRequest(writer, request);
+                    break;
+
                 default:
                     writer.println("Invalid request");
                     break;
@@ -252,6 +260,41 @@ public class ClientHandler extends Thread {
             writer.println(res);
         }
     }
+    private void handleBorrowRequest(PrintWriter writer, String data) throws IOException {
+        try {
+            // Parse request data
+            String[] parts = data.split(":");
+            int bookId = Integer.parseInt(parts[1]);
+            int lenderId =bookService.getBookByID(bookId).getOwnerID();
+
+            // Check if the book belongs to the lender
+            boolean authorized = bookService.isBookBelongsToUser(bookId, lenderId);
+            if (!authorized) {
+                writer.println("401 Unauthorized: You are not authorized to borrow this book");
+                return;
+            }
+
+//            // Check if the lender is currently available to lend the book
+//            if (!userService.isUserAvailableForLending(lenderId)) {
+//                writer.println("The lender is currently not available to lend the book. Please try again later.");
+//                return;
+//            }
+
+            // Add the borrowing request to the database
+            Request request=new Request(loggedInUser.getId(),lenderId,bookId);
+            requestService.addRequest(request);
+
+
+//            // Notify the lender about the borrowing request
+//            notifyLenderAboutBorrowRequest(lenderId);
+
+            writer.println("Borrowing request sent successfully");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            writer.println("Error occurred while processing borrowing request");
+        }
+    }
+
 
 
 }
