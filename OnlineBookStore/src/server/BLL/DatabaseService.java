@@ -28,7 +28,8 @@ public class DatabaseService {
         return DriverManager.getConnection(URL, USERNAME, PASSWORD);
     }
 
-    public static void createTables() {
+    public static void createTables()
+    {
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
             String createUserTableSQL = "CREATE TABLE IF NOT EXISTS Users (" +
@@ -37,6 +38,7 @@ public class DatabaseService {
                     "username VARCHAR(255) UNIQUE," +
                     "password VARCHAR(255))";
             stmt.execute(createUserTableSQL);
+
             String createBooksTableSQL = "CREATE TABLE IF NOT EXISTS Books (" +
                     "id INT AUTO_INCREMENT PRIMARY KEY," +
                     "title VARCHAR(255)," +
@@ -49,7 +51,19 @@ public class DatabaseService {
                     "FOREIGN KEY (owner_id) REFERENCES Users(id))";  //Foreign key constraint for owner_id
             stmt.execute(createBooksTableSQL);
 
-            //many-to-many relationship between users and books (lentBy relationship)
+            // Create Requests table
+            String createRequestsTableSQL = "CREATE TABLE IF NOT EXISTS Requests (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "borrower_id INT," +  // ID of the borrower
+                    "lender_id INT," +  // ID of the lender
+                    "book_id INT," +     // ID of the book
+                    "status VARCHAR(50)," +  // Status of the request
+                    "FOREIGN KEY (borrower_id) REFERENCES Users(id)," +  // Foreign key constraint for borrower_id
+                    "FOREIGN KEY (lender_id) REFERENCES Users(id)," +     // Foreign key constraint for lender_id
+                    "FOREIGN KEY (book_id) REFERENCES Books(id))";        // Foreign key constraint for book_id
+            stmt.execute(createRequestsTableSQL);
+
+            // Create LentBooks table (many-to-many relationship between users and books)
             String createLentBooksTableSQL = "CREATE TABLE IF NOT EXISTS LentBooks (" +
                     "book_id INT," +
                     "user_id INT," +
@@ -61,4 +75,5 @@ public class DatabaseService {
             e.printStackTrace();
         }
     }
+
 }

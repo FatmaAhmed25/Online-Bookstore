@@ -115,6 +115,7 @@ public class BookStoreClient {
             System.out.println("2. Remove book from store");
             System.out.println("3. Search for a book");
             System.out.println("4. See my request history");
+            System.out.println("5. Start chat");
             System.out.println("5. Open messages");
             System.out.println("6.Logout");
             System.out.print("Choose an action: ");
@@ -134,7 +135,7 @@ public class BookStoreClient {
                     handleBorrowRequest(writer, reader);
                     break;
                 case 5:
-                    //handleLendingResponse(writer, reader);
+                    handleChat(writer, reader);
                     break;
                 case 6:
                     loggedIn = false;
@@ -147,6 +148,28 @@ public class BookStoreClient {
         catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static void handleChat(PrintWriter writer, BufferedReader reader) throws IOException {
+        writer.println("chat:open");
+        String response;
+        while (!(response = reader.readLine()).equals("end")) {
+            System.out.println("Your Accepted Requests: " + response);
+        }
+
+//        System.out.println("Enter recipient username: ");
+//        String recipient = consoleInput.readLine();
+//        while (true) {
+//
+//            if (recipient.equalsIgnoreCase("exit")) {
+//                break;
+//            }
+//            System.out.println("Enter message:");
+//            String message = consoleInput.readLine();
+//            sendMessage(recipient, message);
+//
+//        }
+
     }
 
     private static void handleLogin(BufferedReader consoleInput, PrintWriter writer, BufferedReader reader) throws IOException {
@@ -175,9 +198,6 @@ public class BookStoreClient {
         System.out.println("Enter password:");
         String password = consoleInput.readLine();
         writer.println("register"+":"+name+":"+username+":"+password);
-
-
-
         // Receive response from server
         String response = reader.readLine();
         System.out.println("Server response: " + response);
@@ -229,9 +249,6 @@ private static void handleRemoveBook(BufferedReader consoleInput, PrintWriter wr
         // Prompt user for book ID and lender's username
         System.out.println("Enter book ID you want to borrow:");
         int bookId = Integer.parseInt(consoleInput.readLine());
-//        System.out.println("Enter lender's username:");
-//        String lenderUsername = consoleInput.readLine();
-
         // Send borrowing request to server
         writer.println("borrow:" + bookId );
 

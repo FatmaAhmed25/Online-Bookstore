@@ -1,16 +1,14 @@
 package server;
 
-import server.BLL.BookService;
-import server.BLL.RequestService;
+import server.BLL.*;
 import server.model.Book;
-import server.BLL.DatabaseService;
-import server.BLL.UserService;
 import server.model.Request;
 import server.model.User;
 import java.io.*;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class ClientHandler extends Thread {
@@ -19,10 +17,9 @@ public class ClientHandler extends Thread {
     private final RequestService requestService;
     private final DatabaseService db;
     private final BookService bookService;
+    private final ChatService chatService;
    // public static String clientUsername;
     public static User loggedInUser;
-
-
 
     public ClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -30,15 +27,12 @@ public class ClientHandler extends Thread {
         this.db = new DatabaseService();
         this.userService = new UserService();
         this.bookService=new BookService();
-
+        this.chatService= new ChatService();
     }
-
-
     @Override
     public void run() {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
              PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true)) {
-
             boolean exit=false;
             while(!exit){
             // Read the request from the client
@@ -48,9 +42,6 @@ public class ClientHandler extends Thread {
             System.out.println(request);
             // Split the data string using ":" as the delimiter
             String[] parts = request.split(":");
-            System.out.println("hi"+parts[0]);
-
-
             // Handle login or registration based on the request
             switch (parts[0]) {
                 case "login":
@@ -73,14 +64,40 @@ public class ClientHandler extends Thread {
                 case "borrow":
                     handleBorrowRequest(writer, request);
                     break;
+                case "chat":
+                    handleChatOptions(writer, request);
+                    break;
 
                 default:
                     writer.println("Invalid request");
                     break;
             }
-        } }catch (IOException e) {
+        } }catch (IOException | SQLException e) {
             e.printStackTrace();
         }
+    }
+    private void handleChatOptions(PrintWriter writer, String request) throws SQLException {
+        String[] parts = request.split(":");
+        String option = parts[1];
+        if(option.equals("open"))
+        {
+            handleOpenChat(writer,request);
+        }
+    }
+    private void handleOpenChat(PrintWriter writer, String request) throws SQLException {
+//        String[] parts = request.split(":");
+//        String recieverUsername = parts[1];
+//        int recieverID = userService.getUser(recieverUsername).getId();
+        int senderID=loggedInUser.getId();
+        List<Request> requests = requestService.getAcceptedRequestsForRequester(senderID);
+        String res = "";
+        for (Request r : requests) {
+            res += r;
+            res += "\n";
+        }
+        res += "end";
+        System.out.println(res);
+        writer.println(res);
     }
 
     private void handleLogin(PrintWriter writer,String data) throws IOException {
@@ -192,8 +209,6 @@ public class ClientHandler extends Thread {
             throw new RuntimeException(e);
         }
     }
-
-
     //check if the book belongs to the loggedin user
     private void handleRemoveBook(PrintWriter writer,String data) throws IOException {
         // Read book title from the client
@@ -208,57 +223,32 @@ public class ClientHandler extends Thread {
         else {
             writer.println("Authorization error");
         }
-
-
     }
     private void handleGetBooks(PrintWriter writer,String data) throws IOException {
         // Read book title from the client
         String[] parts = data.split(":");
         String category=parts[1];
         String searchKey=parts[2];
-
-
-        // Call the DatabaseService method to remove the book
-        // Modify the DatabaseService class to include a method for removing books
+        ArrayList<Book> books = null;
         if(Objects.equals(category, "title")) {
-            ArrayList<Book> books = bookService.getBooksByTitle(searchKey);
-            String res = "";
-            for (int i = 0; i < books.size(); i++)
-            {
-                res += books.get(i);
-                res+="\n";
-            }
-            res += "end";
-            System.out.println("ho"+res);
-            writer.println(res);
+            books = bookService.getBooksByTitle(searchKey);
         }
         else if (Objects.equals(category, "author"))
         {
-            ArrayList<Book> books = bookService.getBooksByAuthor(searchKey);
-            String res = "";
-            for (int i = 0; i < books.size(); i++)
-            {
-                res += books.get(i);
-                res+="\n";
-            }
-            res += "end";
-            System.out.println("ho"+res);
-            writer.println(res);
+            books = bookService.getBooksByAuthor(searchKey);
         }
-
         else if(Objects.equals(category, "genre"))
         {
-            ArrayList<Book> books = bookService.getBooksByGenre(searchKey);
-            String res = "";
-            for (int i = 0; i < books.size(); i++)
-            {
-                res += books.get(i);
-                res+="\n";
-            }
-            res += "end";
-            System.out.println("ho"+res);
-            writer.println(res);
+            books = bookService.getBooksByGenre(searchKey);
         }
+        String res = "";
+        assert books != null;
+        for (Book book : books) {
+            res += book;
+            res += "\n";
+        }
+        res += "end";
+        writer.println(res);
     }
     private void handleBorrowRequest(PrintWriter writer, String data) throws IOException {
         try {
@@ -274,19 +264,9 @@ public class ClientHandler extends Thread {
                 return;
             }
 
-//            // Check if the lender is currently available to lend the book
-//            if (!userService.isUserAvailableForLending(lenderId)) {
-//                writer.println("The lender is currently not available to lend the book. Please try again later.");
-//                return;
-//            }
-
             // Add the borrowing request to the database
             Request request=new Request(loggedInUser.getId(),lenderId,bookId);
             requestService.addRequest(request);
-
-
-//            // Notify the lender about the borrowing request
-//            notifyLenderAboutBorrowRequest(lenderId);
 
             writer.println("Borrowing request sent successfully");
         } catch (SQLException e) {
@@ -294,7 +274,4 @@ public class ClientHandler extends Thread {
             writer.println("Error occurred while processing borrowing request");
         }
     }
-
-
-
 }
