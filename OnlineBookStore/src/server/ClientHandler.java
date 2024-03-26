@@ -82,12 +82,55 @@ public class ClientHandler extends Thread {
                 case "browse":
                     handleBrowse(writer);
 
+                case "statistics":
+                    handleStatisticsRequest(writer,request);
+                    break;
+
                 default:
                     writer.println("Invalid request");
                     break;
             }
         } }catch (IOException | SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+
+    private void handleStatisticsRequest(PrintWriter writer, String request) throws IOException {
+        try {
+            // Parse the request to determine which statistics data the client is requesting
+            String[] parts = request.split(":");
+            String statisticsType = parts[1];
+
+            // Retrieve the relevant statistics data based on the type requested
+            String statisticsData = "";
+            switch (statisticsType) {
+                case "overall":
+                    //getOverall();
+                    break;
+                case "availablebooks":
+                    List<Book>books=bookService.getAvailableBooks();
+                    String res = "";
+                    assert books != null;
+                    for (Book b : books) {
+                        res += b;
+                        res += "\n";
+                    }
+                    writer.println(res);
+                    break;
+                case "borrowedbooks":
+                    List<Book>borrowedBooks=bookService.getCurrentBorrowedBooks();
+                    break;
+                default:
+                    writer.println("Invalid statistics type");
+                    return;
+            }
+
+            // Send the statistics data back to the client
+            writer.println(statisticsData);
+        } catch (Exception e) {
+            e.printStackTrace();
+            writer.println("Error occurred while processing statistics request");
         }
     }
 

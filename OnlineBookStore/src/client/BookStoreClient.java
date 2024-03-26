@@ -11,6 +11,7 @@ public class BookStoreClient {
     private static final String SERVER_HOST = "localhost";
     private static final int SERVER_PORT = 12345;
     public static String username1;
+    public static boolean isAdmin;
     public static BlockingQueue<String> queue = new LinkedBlockingQueue<>();
 
     static Socket socket;
@@ -147,8 +148,15 @@ public class BookStoreClient {
                         case 10:
                             handleBrowse(writer);
                             break;
-
                         case 11:
+                            // Open statistics menu
+                            if(isAdmin)
+                              statisticsMenu();
+                            else
+                                System.out.println("You are not an admin");
+                            break;
+
+                        case 12:
                             loggedIn = false;
                             break;
                         default:
@@ -165,6 +173,37 @@ public class BookStoreClient {
         Thread loggedInThread = new Thread(loggedInTask);
         loggedInThread.start();
     }
+
+    private static void statisticsMenu() throws IOException
+    {
+        System.out.println("\nStatistics Menu:");
+        System.out.println("1. Overall Statistics");
+        System.out.println("2. Available Books");
+        System.out.println("3. Current Borrowed Books");
+        System.out.println("4. Back to main menu");
+        System.out.print("Choose an option: ");
+        int choice = Integer.parseInt(consoleInput.readLine());
+        switch (choice) {
+            case 1:
+                System.out.println("Overall Statistics:");
+                break;
+            case 2:
+                writer.println("statistics:availablebooks");
+                System.out.println("Available Books Statistics:");
+
+                break;
+            case 3:
+                writer.println("statistics:borrowedbooks");
+                System.out.println("Current Borrowed Books Statistics:");
+
+                break;
+            case 4:
+                // Go back to main menu
+                break;
+            default:
+                System.out.println("Invalid choice.");
+        }
+    }
     private static void viewMyRequestsAsBorrower(PrintWriter writer) throws IOException {
         // Send a request to the server to retrieve the borrower's requests
         writer.println("viewborrowrequests");
@@ -177,6 +216,10 @@ public class BookStoreClient {
     }
 
 
+
+    private static void handleSearchBooks(PrintWriter writer1,BufferedReader reader1,String category,String res) throws IOException {
+        writer1.println("search"+":"+category+":"+res);
+    }
     private static void handleBrowse(PrintWriter writer) {
         writer.println("browse");
     }
@@ -212,6 +255,8 @@ public class BookStoreClient {
         }
     }
 
+
+
     private static void handleChat(PrintWriter writer, BufferedReader reader) throws IOException {
          writer.println("chat:open");
          System.out.println("Enter username that you want to chat with: ");
@@ -237,6 +282,19 @@ public class BookStoreClient {
         System.out.println("Enter password:");
         String password = consoleInput.readLine();
         writer.println("login"+":"+username+":"+password);
+        // Check if the user is an admin
+        if (username.contains("admin")) {
+            System.out.println("You are now logged in as admin.");
+            isAdmin = true;
+
+        }
+        else
+        {
+            System.out.println("You are now logged in as a regular user.");
+            isAdmin = false;
+        }
+
+
 
         String response = reader.readLine();
         System.out.println("Server response: " + response);
@@ -287,9 +345,7 @@ private static void handleRemoveBook(BufferedReader consoleInput, PrintWriter wr
 
         }
 
-    private static void handleSearchBooks(PrintWriter writer1,BufferedReader reader1,String category,String res) throws IOException {
-        writer1.println("search"+":"+category+":"+res);
-    }
+
     private static void handleBorrowRequest(PrintWriter writer, BufferedReader reader) throws IOException {
         // Prompt user for book ID and lender's username
         System.out.println("Enter book ID you want to borrow:");

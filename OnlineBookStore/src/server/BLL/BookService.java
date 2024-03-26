@@ -11,6 +11,13 @@ import java.util.ArrayList;
 
 public class BookService {
     private BookDAL bookDB = new BookDAL();
+
+    public ArrayList<Book> getAvailableBooks() {
+        return bookDB.getAvailableBooks();
+    }
+    public ArrayList<Book> getCurrentBorrowedBooks() {
+        return bookDB.getCurrentBorrowedBooks();
+    }
     public boolean removeBook(int bookId,int userId) {
         Book book=bookDB.getBookByID(bookId);
         if(book == null)
