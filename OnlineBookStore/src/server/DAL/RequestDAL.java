@@ -12,6 +12,32 @@ import java.util.List;
 
 public class RequestDAL {
 
+    // Get borrowing requests for a specific user as a borrower
+    public List<Request> getRequestsForBorrower(int borrowerId) {
+        List<Request> pendingRequests = new ArrayList<>();
+        String getPendingRequestsSQL = "SELECT * FROM Requests WHERE borrower_id = ?";
+
+        try (Connection conn = DatabaseService.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(getPendingRequestsSQL)) {
+            pstmt.setInt(1, borrowerId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    int lenderId = rs.getInt("lender_id");
+                    int bookId = rs.getInt("book_id");
+                    String status = rs.getString("status");
+                    Request request = new Request(borrowerId, lenderId, bookId);
+                    request.setId(id);
+                    request.setStatus(status);
+                    pendingRequests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return pendingRequests;
+    }
+
     // Add a borrowing request to the database
     public void addRequest(Request request) throws SQLException {
         String addRequestSQL = "INSERT INTO Requests (borrower_id, lender_id, book_id, status) VALUES (?, ?, ?, 'pending')";

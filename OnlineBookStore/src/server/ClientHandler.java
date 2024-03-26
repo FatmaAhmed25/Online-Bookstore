@@ -20,7 +20,7 @@ public class ClientHandler extends Thread {
     private final BookService bookService;
     private final ChatService chatService;
    // public static String clientUsername;
-    public static User loggedInUser;
+    public  User loggedInUser;
 
     public ClientHandler(Socket clientSocket) {
         this.clientSocket = clientSocket;
@@ -73,6 +73,9 @@ public class ClientHandler extends Thread {
                     break;
                 case"request":
                     handleRequest(writer,request);
+                case "viewborrowrequests":
+                    sendBorrowerRequests(writer);
+                    break;
 
                 default:
                     writer.println("Invalid request");
@@ -82,6 +85,20 @@ public class ClientHandler extends Thread {
             e.printStackTrace();
         }
     }
+    private void sendBorrowerRequests(PrintWriter writer) {
+        System.out.println(loggedInUser.getId());
+        List<Request>requests=requestService.getRequestsForBorrower(loggedInUser.getId());
+        String res = "";
+        assert requests != null;
+        for (Request r : requests) {
+            res += r;
+            res += "\n";
+        }
+        res += "end";
+        writer.println(res);
+
+    }
+
 
     private void handleRequest(PrintWriter writer, String request) throws SQLException {
         String[] parts = request.split(":");

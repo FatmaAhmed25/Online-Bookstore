@@ -107,7 +107,8 @@ public class BookStoreClient {
                     System.out.println("5. Start chat");
                     System.out.println("6. Open messages");
                     System.out.println("7. Accept/Reject borrowing requests");
-                    System.out.println("7. Logout");
+                    System.out.println("8. Accept/Reject borrowing requests");
+                    System.out.println("9. Logout");
                     System.out.print("Choose an action: ");
                     int loggedInChoice = Integer.parseInt(consoleInput.readLine());
 
@@ -135,6 +136,10 @@ public class BookStoreClient {
 
                             break;
                         case 8:
+                            viewMyRequests(writer,reader);
+                            break;
+
+                        case 9:
                             loggedIn = false;
                             break;
                         default:
@@ -150,6 +155,17 @@ public class BookStoreClient {
         // Start a new thread for loggedInTask
         Thread loggedInThread = new Thread(loggedInTask);
         loggedInThread.start();
+    }
+    private static void viewMyRequests(PrintWriter writer, BufferedReader reader) throws IOException {
+        // Send a request to the server to retrieve the borrower's requests
+        writer.println("viewborrowrequests");
+
+        // Receive response from the server
+        String response;
+        while (!(response = reader.readLine()).equals("end")) {
+            // Display each request to the user
+            System.out.println(response);
+        }
     }
     public static void searchActions() throws IOException {
         System.out.println("Search by:");
