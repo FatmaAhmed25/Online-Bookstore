@@ -164,12 +164,6 @@ public class BookStoreClient {
         // Send a request to the server to retrieve the borrower's requests
         writer.println("viewborrowrequests");
 
-        // Receive response from the server
-        String response;
-        while (!(response = reader.readLine()).equals("end")) {
-            // Display each request to the user
-            System.out.println(response);
-        }
     }
 
     private static void handleBrowse(PrintWriter writer) {
@@ -211,6 +205,9 @@ public class BookStoreClient {
          writer.println("chat:open");
          System.out.println("Enter username that you want to chat with: ");
          String recieverUsername=consoleInput.readLine();
+         if (recieverUsername.equals(username1))
+             System.out.println("You can't chat with yourself");
+         else{
          String message = "";
          writer.println("chat:start:"+recieverUsername);
          while(!message.equals("x"))
@@ -219,7 +216,7 @@ public class BookStoreClient {
              message=consoleInput.readLine();
              writer.println("chat:send:"+recieverUsername+":"+message);
          }
-    }
+    }}
 
     private static void handleLogin(BufferedReader consoleInput, PrintWriter writer, BufferedReader reader) throws IOException {
         // Prompt user for username and password
