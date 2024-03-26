@@ -193,8 +193,6 @@ public class BookStoreClient {
              System.out.print(">>>");
              message=consoleInput.readLine();
              writer.println("chat:send:"+recieverUsername+":"+message);
-
-
          }
     }
 
