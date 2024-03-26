@@ -16,7 +16,9 @@ public class ChatService {
 
     public void createChatRoom(int requesterId, int borrowerId,String requesterUsername, String lenderUsername) throws SQLException {
         if(getChatRoomByRequesterIdAndBorrowerId(requesterId,borrowerId)==null)
+        {
             chatRoomDB.saveChatRoom(requesterId,borrowerId,requesterUsername,lenderUsername);
+        }
     }
 
     public Message createMessage(int chatRoomId, String senderUsername, String recipientUsername, String content) throws SQLException {

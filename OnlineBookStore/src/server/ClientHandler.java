@@ -76,6 +76,8 @@ public class ClientHandler extends Thread {
                 case "viewborrowrequests":
                     sendBorrowerRequests(writer);
                     break;
+                case "browse":
+                    handleBrowse(writer);
 
                 default:
                     writer.println("Invalid request");
@@ -98,7 +100,16 @@ public class ClientHandler extends Thread {
         writer.println(res);
 
     }
-
+    private void handleBrowse(PrintWriter writer) {
+        List<Book>books=bookService.getAllAvailableBooks();
+        String res = "";
+        assert books != null;
+        for (Book b : books) {
+            res += b;
+            res += "\n";
+        }
+        writer.println(res);
+    }
 
     private void handleRequest(PrintWriter writer, String request) throws SQLException {
         String[] parts = request.split(":");
@@ -109,7 +120,7 @@ public class ClientHandler extends Thread {
             writer.println("Request Accepted successfully");
             Request borrowRequest= requestService.getRequest(requestId);
             int requester_id=borrowRequest.getBorrowerId();
-
+            bookService.decreaseQuantity(borrowRequest.getBookId());
             User requester=userService.getUserById(requester_id);
             String requesterUsername= requester.getUsername();
             //create a chat room for requester and lender
@@ -130,7 +141,6 @@ public class ClientHandler extends Thread {
             res += r;
             res += "\n";
         }
-        res += "end";
         writer.println(res);
     }
 
@@ -165,7 +175,6 @@ public class ClientHandler extends Thread {
                 res += r;
                 res += "\n";
             }
-            res += "end";
             System.out.println(res);
          writer.println(res);
 
@@ -378,13 +387,18 @@ public class ClientHandler extends Thread {
             String[] parts = data.split(":");
             int bookId = Integer.parseInt(parts[1]);
             int lenderId =bookService.getBookByID(bookId).getOwnerID();
-
+            if(lenderId == loggedInUser.getId())
+            {
+                writer.println("Error: You cant lend your own book");
+                return;
+            }
             // Check if the book belongs to the lender
             boolean authorized = bookService.isBookBelongsToUser(bookId, lenderId);
             if (!authorized) {
                 writer.println("401 Unauthorized: You are not authorized to borrow this book");
                 return;
             }
+
 
             // Add the borrowing request to the database
             Request request=new Request(loggedInUser.getId(),lenderId,bookId);

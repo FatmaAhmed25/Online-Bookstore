@@ -1,6 +1,7 @@
 package server.model;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Message {
     private String senderUsername;
@@ -68,6 +69,7 @@ public class Message {
     // Override toString() method for debugging or displaying messages
     @Override
     public String toString() {
-        return "[" + timestamp.toString() + "] " + senderUsername + " -> " + recipientUsername + ": " + content;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd HH:mm:ss");
+        return "[" + timestamp.format(formatter) + "] " + senderUsername + " -> " + recipientUsername + ": " + content;
     }
 }

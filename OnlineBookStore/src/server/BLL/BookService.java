@@ -70,4 +70,14 @@ public class BookService {
     public boolean isBookBelongsToUser(int bookId, int lenderId) {
         return bookDB.bookBelongsToUser(bookId,lenderId);
     }
+    public ArrayList<Book> getAllAvailableBooks() {
+        ArrayList<Book> books = new ArrayList<>();
+        books = bookDB.getAvailableBooks();
+        return books;
+    }
+
+    public void decreaseQuantity(int bookId) {
+
+        bookDB.decreaseBookQuantity(bookId);
+    }
 }

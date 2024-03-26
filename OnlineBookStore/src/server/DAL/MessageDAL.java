@@ -25,7 +25,7 @@ public class MessageDAL {
     public List<Message> getMessagesForChatRoom(int chatRoomId) {
         List<Message> messages = new ArrayList<>();
 
-        String sql = "SELECT * FROM Messages WHERE chatRoomId = ?";
+        String sql = "SELECT * FROM Messages WHERE chatRoomId = ? ORDER BY timestamp ASC"; // Sorting by timestamp in ascending order
 
         try (PreparedStatement statement = DatabaseService.getConnection().prepareStatement(sql)) {
             statement.setInt(1, chatRoomId);
