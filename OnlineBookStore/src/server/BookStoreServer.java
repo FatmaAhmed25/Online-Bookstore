@@ -12,8 +12,7 @@ import java.util.Map;
 public class BookStoreServer {
     private static final int PORT = 12345;
     public static Map<Integer, PrintWriter> clients = new HashMap<>();
-
-
+    public static Map<String, ClientHandler> onlineUsers = new HashMap<>();
     public static void main(String[] args) {
         DatabaseService.createTables();
 

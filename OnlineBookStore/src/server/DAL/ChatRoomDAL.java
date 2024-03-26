@@ -53,8 +53,8 @@ public class ChatRoomDAL {
         try (PreparedStatement statement = DatabaseService.getConnection().prepareStatement(sql)) {
             statement.setInt(1, requesterId);
             statement.setInt(2, lenderId);
-            statement.setInt(3, lenderId); // Set the third parameter
-            statement.setInt(4, requesterId);    // Set the fourth parameter
+            statement.setInt(3, requesterId);
+            statement.setInt(4, lenderId);
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) { // Check if there's a result
                     int chatRoomId = resultSet.getInt("id");
@@ -62,7 +62,6 @@ public class ChatRoomDAL {
                     String lenderUsername = resultSet.getString("recipientUsername");
                     chatRoom = new ChatRoom(chatRoomId, requesterId, lenderId, requesterUsername, lenderUsername);
                 } else {
-                    // Handle case when no chat room is found
                     System.out.println("No chat room found for the given IDs.");
                 }
             }
@@ -71,5 +70,23 @@ public class ChatRoomDAL {
         }
         return chatRoom;
 
+    }
+
+    public boolean isValidChat(String username, String recieverUsername) {
+        String sql = "SELECT * FROM ChatRooms WHERE (senderUsername = ? AND recipientUsername = ?) OR (senderUsername = ? AND recipientUsername = ?)";
+        try (PreparedStatement statement = DatabaseService.getConnection().prepareStatement(sql)) {
+            statement.setString(1, username);
+            statement.setString(2, recieverUsername);
+            statement.setString(3, recieverUsername);
+            statement.setString(4, username);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return true;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

@@ -83,8 +83,7 @@ public class BookStoreClient {
             try {
                 String message;
                 while ((message = reader.readLine()) != null) {
-                    // Process other types of messages if needed
-                    System.out.println("\n***Server: "+message+"***");
+                    System.out.println("\n>> " + message);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -255,24 +254,25 @@ public class BookStoreClient {
         }
     }
 
-
-
     private static void handleChat(PrintWriter writer, BufferedReader reader) throws IOException {
-         writer.println("chat:open");
-         System.out.println("Enter username that you want to chat with: ");
-         String recieverUsername=consoleInput.readLine();
-         if (recieverUsername.equals(username1))
-             System.out.println("You can't chat with yourself");
-         else{
-         String message = "";
-         writer.println("chat:start:"+recieverUsername);
-         while(!message.equals("x"))
-         {
-             System.out.print(">>>");
-             message=consoleInput.readLine();
-             writer.println("chat:send:"+recieverUsername+":"+message);
-         }
-    }}
+        writer.println("chat:open");
+        System.out.println("Enter username that you want to chat with: ");
+        String recieverUsername = consoleInput.readLine();
+        if (recieverUsername.equals(username1))
+            System.out.println("You can't chat with yourself");
+        else {
+            String message = "";
+            writer.println("chat:start:" + recieverUsername);
+            while (!message.equals("x")) {
+                System.out.print(">>>");
+                message = consoleInput.readLine();
+
+                if (!message.equals("x")) {
+                    writer.println("chat:send:" + recieverUsername + ":" + message);
+                }
+            }
+        }
+    }
 
     private static void handleLogin(BufferedReader consoleInput, PrintWriter writer, BufferedReader reader) throws IOException {
         // Prompt user for username and password

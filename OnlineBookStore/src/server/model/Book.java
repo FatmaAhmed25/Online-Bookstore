@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Book {
+    private int id;
     private String title;
     private String author;
     private String genre; // can be enum
@@ -16,6 +17,17 @@ public class Book {
         return title;
     }
     public Book(String title, String author, String genre, double price, String description,int ownerID,int quantity) {
+        this.title = title;
+        this.author = author;
+        this.genre = genre;
+        this.price = price;
+        this.description = description;
+        this.quantity = quantity;
+        this.ownerID = ownerID;
+        this.lentBy=new ArrayList<>();
+    }
+    public Book(int id,String title, String author, String genre, double price, String description,int ownerID,int quantity) {
+        this.id=id;
         this.title = title;
         this.author = author;
         this.genre = genre;
@@ -87,6 +99,7 @@ public class Book {
     @Override
     public String toString() {
         return "Book{" +
+                "book id"+id+'\''+
                 "title='" + title + '\'' +
                 ", author='" + author + '\'' +
                 ", genre='" + genre + '\'' +
