@@ -9,6 +9,18 @@ import java.util.List;
 public class RequestService {
 
     private RequestDAL requestDB = new RequestDAL();
+
+
+    public List<Request> getAcceptedRequests() {
+        return requestDB.getAcceptedRequests();
+    }
+    public List<Request> getPendingRequests() {
+        return requestDB.getPendingRequests();
+    }
+    public List<Request> getRejectedRequests() {
+        return requestDB.getRejectedRequests();
+    }
+
     public List<Request> getRequestsForBorrower(int borrowerId){
         return requestDB.getRequestsForBorrower(borrowerId);
     }

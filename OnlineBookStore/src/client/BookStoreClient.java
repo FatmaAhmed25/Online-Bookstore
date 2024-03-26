@@ -110,7 +110,8 @@ public class BookStoreClient {
                     System.out.println("8. view borrowing requests");
                     System.out.println("9. view lending requests");
                     System.out.println("10. Browse all books");
-                    System.out.println("11. Logout");
+                    System.out.println("11. Statistics");
+                    System.out.println("12. Logout");
                     System.out.print("Choose an action: ");
                     int loggedInChoice = Integer.parseInt(consoleInput.readLine());
 
@@ -179,7 +180,9 @@ public class BookStoreClient {
         System.out.println("1. Overall Statistics");
         System.out.println("2. Available Books");
         System.out.println("3. Current Borrowed Books");
-        System.out.println("4. Back to main menu");
+        System.out.println("4. Accepted Requests");
+        System.out.println("5. Pending Requests");
+        System.out.println("6. Rejected Requests");
         System.out.print("Choose an option: ");
         int choice = Integer.parseInt(consoleInput.readLine());
         switch (choice) {
@@ -197,8 +200,18 @@ public class BookStoreClient {
 
                 break;
             case 4:
-                // Go back to main menu
+                writer.println("statistics:acceptedrequests");
+                System.out.println("Accepted Requests Statistics:");
                 break;
+            case 5:
+                writer.println("statistics:rejectedrequests");
+                System.out.println("Rejected Requests Statistics:");
+                break;
+            case 6:
+                writer.println("statistics:pendingrequests");
+                System.out.println("pending Requests Statistics:");
+                break;
+
             default:
                 System.out.println("Invalid choice.");
         }

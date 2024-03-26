@@ -106,31 +106,67 @@ public class ClientHandler extends Thread {
             String statisticsType = parts[1];
 
             // Retrieve the relevant statistics data based on the type requested
-            String statisticsData = "";
+            String res = "";
             switch (statisticsType) {
+
                 case "overall":
                     //getOverall();
                     break;
                 case "availablebooks":
-                    List<Book> books = bookService.getAvailableBooks();
-                    String res = "";
+                    List<Book>books=bookService.getAvailableBooks();
                     assert books != null;
                     for (Book b : books) {
                         res += b;
                         res += "\n";
                     }
                     writer.println(res);
+
                     break;
                 case "borrowedbooks":
-                    List<Book> borrowedBooks = bookService.getCurrentBorrowedBooks();
+                    List<Book>borrowedBooks=bookService.getCurrentBorrowedBooks();
+                    assert borrowedBooks!= null;
+                    for (Book b : borrowedBooks) {
+                        res += b;
+                        res += "\n";
+                    }
+                    writer.println(res);
+
+                    break;
+                case "acceptedrequests":
+                    List<Request>acceptRequests=requestService.getAcceptedRequests();
+                    assert acceptRequests!=null;
+                    for (Request r : acceptRequests) {
+                        res += r;
+                        res += "\n";
+                    }
+                    writer.println(res);
+                    break;
+
+                case "rejectedrequests":
+                    List<Request>rejectedRequests=requestService.getRejectedRequests();
+                    assert rejectedRequests!=null;
+                    for (Request r : rejectedRequests) {
+                        res += r;
+                        res += "\n";
+                    }
+                    writer.println(res);
+                    break;
+                case "pendingrequests":
+                    List<Request>pendingRequests=requestService.getPendingRequests();
+                    assert pendingRequests!=null;
+                    for (Request r : pendingRequests) {
+                        res += r;
+                        res += "\n";
+                    }
+                    writer.println(res);
                     break;
                 default:
                     writer.println("Invalid statistics type");
-                    return;
+                        return;
             }
 
             // Send the statistics data back to the client
-            writer.println(statisticsData);
+           // writer.println(res);
         } catch (Exception e) {
             e.printStackTrace();
             writer.println("Error occurred while processing statistics request");
@@ -139,7 +175,7 @@ public class ClientHandler extends Thread {
 
     private void viewLenderRequests(PrintWriter writer) {
         System.out.println(loggedInUser.getId());
-        List<Request> requests = requestService.getRequestsForLender(loggedInUser.getId());
+        List<Request>requests=requestService.getRequestsForLender(loggedInUser.getId());
         String res = "";
         assert requests != null;
         for (Request r : requests) {
@@ -153,7 +189,7 @@ public class ClientHandler extends Thread {
 
     private void viewBorrowerRequests(PrintWriter writer) {
         System.out.println(loggedInUser.getId());
-        List<Request> requests = requestService.getRequestsForBorrower(loggedInUser.getId());
+        List<Request>requests=requestService.getRequestsForBorrower(loggedInUser.getId());
         String res = "";
         assert requests != null;
         for (Request r : requests) {
@@ -177,27 +213,28 @@ public class ClientHandler extends Thread {
 
     private void handleRequest(PrintWriter writer, String request) throws SQLException {
         String[] parts = request.split(":");
-        int requestId = Integer.parseInt(parts[2]);
-        if (parts[1].equals("accept")) {
+        int requestId= Integer.parseInt(parts[2]);
+        if(parts[1].equals("accept"))
+        {
             requestService.acceptRequest(requestId);
             writer.println("Request Accepted successfully");
-            Request borrowRequest = requestService.getRequest(requestId);
-            int requester_id = borrowRequest.getBorrowerId();
+            Request borrowRequest= requestService.getRequest(requestId);
+            int requester_id=borrowRequest.getBorrowerId();
             bookService.decreaseQuantity(borrowRequest.getBookId());
-            User requester = userService.getUserById(requester_id);
-            String requesterUsername = requester.getUsername();
+            User requester=userService.getUserById(requester_id);
+            String requesterUsername= requester.getUsername();
             //create a chat room for requester and lender
-            chatService.createChatRoom(requester_id, loggedInUser.getId(), requesterUsername, loggedInUser.getUsername());
-        } else if (parts[1].equals("reject")) {
+            chatService.createChatRoom(requester_id,loggedInUser.getId(),requesterUsername,loggedInUser.getUsername());
+        }
+        else if(parts[1].equals("reject")) {
             requestService.rejectRequest(requestId);
             writer.println("Request Rejected successfully");
 
-        }
-        ;
+        };
     }
 
     private void handleGetRequests(PrintWriter writer, String request) {
-        List<Request> requests = requestService.getPendingRequestsForLender(loggedInUser.getId());
+        List<Request>requests=requestService.getPendingRequestsForLender(loggedInUser.getId());
         String res = "";
         assert requests != null;
         for (Request r : requests) {
