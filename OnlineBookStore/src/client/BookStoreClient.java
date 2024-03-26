@@ -108,8 +108,9 @@ public class BookStoreClient {
                     System.out.println("6. Open messages");
                     System.out.println("7. Accept/Reject borrowing requests");
                     System.out.println("8. view borrowing requests");
-                    System.out.println("9. Browse all books");
-                    System.out.println("10. Logout");
+                    System.out.println("9. view lending requests");
+                    System.out.println("10. Browse all books");
+                    System.out.println("11. Logout");
                     System.out.print("Choose an action: ");
                     int loggedInChoice = Integer.parseInt(consoleInput.readLine());
 
@@ -137,13 +138,17 @@ public class BookStoreClient {
 
                             break;
                         case 8:
-                            viewMyRequests(writer,reader);
+                            viewMyRequestsAsBorrower(writer);
+                            break;
+                        case 9:
+                            viewMyRequestsAsLender(writer);
                             break;
 
-                        case 9:
+                        case 10:
                             handleBrowse(writer);
                             break;
-                        case 10:
+
+                        case 11:
                             loggedIn = false;
                             break;
                         default:
@@ -160,11 +165,17 @@ public class BookStoreClient {
         Thread loggedInThread = new Thread(loggedInTask);
         loggedInThread.start();
     }
-    private static void viewMyRequests(PrintWriter writer, BufferedReader reader) throws IOException {
+    private static void viewMyRequestsAsBorrower(PrintWriter writer) throws IOException {
         // Send a request to the server to retrieve the borrower's requests
         writer.println("viewborrowrequests");
 
     }
+    private static void viewMyRequestsAsLender(PrintWriter writer) throws IOException {
+        // Send a request to the server to retrieve the borrower's requests
+        writer.println("viewlenderequests");
+
+    }
+
 
     private static void handleBrowse(PrintWriter writer) {
         writer.println("browse");

@@ -7,11 +7,15 @@ import java.sql.SQLException;
 import java.util.List;
 
 public class RequestService {
+
+    private RequestDAL requestDB = new RequestDAL();
     public List<Request> getRequestsForBorrower(int borrowerId){
-        requestDB.getRequestsForBorrower(borrowerId);
         return requestDB.getRequestsForBorrower(borrowerId);
     }
-    private RequestDAL requestDB = new RequestDAL();
+    public List<Request> getRequestsForLender(int lenderId){
+        return requestDB.getRequestsForLender(lenderId);
+    }
+
 
     public void addRequest(Request request) throws SQLException {
         requestDB.addRequest(request);
