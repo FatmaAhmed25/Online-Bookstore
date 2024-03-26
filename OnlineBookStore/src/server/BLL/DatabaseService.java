@@ -70,7 +70,26 @@ public class DatabaseService {
                     "FOREIGN KEY (book_id) REFERENCES Books(id)," +
                     "FOREIGN KEY (user_id) REFERENCES Users(id)," +
                     "PRIMARY KEY (book_id, user_id))";  // Composite primary key to ensure uniqueness
+
             stmt.execute(createLentBooksTableSQL);
+            String createChatRoomsTableSQL = "CREATE TABLE IF NOT EXISTS ChatRooms (" +
+                    "id INT AUTO_INCREMENT PRIMARY KEY," +
+                    "requester_id INT," +  // ID of the requester
+                    "lender_id INT," +      // ID of the lender
+                    "senderUsername VARCHAR(255)," +
+                    "recipientUsername VARCHAR(255)," +
+                    "FOREIGN KEY (requester_id) REFERENCES Users(id)," +  // Foreign key constraint for requester_id
+                    "FOREIGN KEY (lender_id) REFERENCES Users(id))";       // Foreign key constraint for lender_id
+            stmt.execute(createChatRoomsTableSQL);
+            String createMessagesTableSQL = "CREATE TABLE IF NOT EXISTS Messages (" +
+                    "messageId INT AUTO_INCREMENT PRIMARY KEY," +
+                    "chatRoomId INT," +
+                    "senderUsername VARCHAR(255)," +
+                    "recipientUsername VARCHAR(255)," +
+                    "content VARCHAR(255)," +
+                    "timestamp DATETIME," +
+                    "FOREIGN KEY (chatRoomId) REFERENCES ChatRooms(id))";  // Foreign key constraint for chatRoomId
+            stmt.execute(createMessagesTableSQL);
         } catch (SQLException e) {
             e.printStackTrace();
         }

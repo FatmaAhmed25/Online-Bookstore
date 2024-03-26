@@ -28,6 +28,14 @@ public class UserService {
     }
 
 
+    public User getUserById(int id) throws SQLException {
+        User user = userDB.getUserById(id);
+        if(user==null)
+        {
+            throw new NullPointerException("User not found");
+        }
+        return user;
+    }
 }
 
 

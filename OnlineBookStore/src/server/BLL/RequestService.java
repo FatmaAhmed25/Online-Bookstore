@@ -24,11 +24,21 @@ public class RequestService {
     }
     public void acceptRequest(int requestId)
     {
+        Request request = getRequest(requestId);
         requestDB.acceptRequest(requestId);
     }
     public void rejectRequest(int requestId)
     {
+        Request request = getRequest(requestId);
         requestDB.rejectRequest(requestId);
+    }
+    public Request getRequest(int requestId){
+        Request request=null;
+        request = requestDB.getRequest(requestId);
+        if(request == null){
+            throw new NullPointerException("Request is not found");
+        }
+        return request;
     }
 
 

@@ -41,10 +41,13 @@ public class RequestDAL {
                 while (rs.next()) {
                     int id = rs.getInt("id");
                     int borrowerId = rs.getInt("borrower_id");
+                    int lenderId = rs.getInt("lender_id");
                     int bookId = rs.getInt("book_id");
-                    //String status = rs.getString("status");
-
-                    pendingRequests.add(new Request(borrowerId, userId, bookId));
+                    String status = rs.getString("status");
+                    Request request=new Request(borrowerId, lenderId, bookId);
+                    request.setId(id);
+                    request.setStatus(status);
+                    pendingRequests.add(request);
                 }
             }
         } catch (SQLException e) {
@@ -67,16 +70,12 @@ public class RequestDAL {
                     //String status = rs.getString("status");
                     Request request=new Request(borrowerId, userId, bookId);
                     request.setId(id);
+                    request.setStatus("Accpeted");
                     AcceptedRequests.add(request);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        }
-        System.out.println("here");
-        for(int i=0;i<AcceptedRequests.size();i++)
-        {
-            System.out.println(AcceptedRequests.get(i));
         }
         return AcceptedRequests;
     }
@@ -97,8 +96,11 @@ public class RequestDAL {
                     int lenderId = rs.getInt("lender_id");
                     int bookId = rs.getInt("book_id");
                     String status = rs.getString("status");
+                    Request request=new Request(borrowerId, lenderId, bookId);
+                    request.setId(id);
+                    request.setStatus(status);
+                    allRequests.add(request);
 
-                    allRequests.add(new Request(borrowerId, lenderId, bookId));
                 }
             }
         } catch (SQLException e) {
@@ -130,5 +132,30 @@ public class RequestDAL {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public Request getRequest(int requestId) {
+        String getPendingRequestsSQL = "SELECT * FROM Requests WHERE id = ?";
+        Request request = null;
+
+        try (Connection connection = DatabaseService.getConnection();
+             PreparedStatement preparedStatement = connection.prepareStatement(getPendingRequestsSQL)) {
+            preparedStatement.setInt(1, requestId);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    int id = rs.getInt("id");
+                    int borrowerId = rs.getInt("borrower_id");
+                    int lenderId = rs.getInt("lender_id");
+                    int bookId = rs.getInt("book_id");
+                    String status = rs.getString("status");
+
+                    request=new Request(borrowerId, lenderId, bookId);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return request;
     }
 }

@@ -30,4 +30,16 @@ public class UserDAL {
         }
         return null;
     }
+    public User getUserById(int id) throws SQLException {
+        try (Connection conn = DatabaseService.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Users WHERE id = ?")) {
+            pstmt.setInt(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return new User(rs.getInt("id"),rs.getString("name"), rs.getString("username"), rs.getString("password"));
+                }
+            }
+        }
+        return null;
+    }
 }

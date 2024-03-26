@@ -7,12 +7,21 @@ public class Message {
     private String recipientUsername;
     private String content;
     private LocalDateTime timestamp;
+    private int chatRoomId;
 
     public Message(String senderUsername, String recipientUsername, String content) {
         this.senderUsername = senderUsername;
         this.recipientUsername = recipientUsername;
         this.content = content;
         this.timestamp = LocalDateTime.now(); // Timestamp the message with the current time
+    }
+
+    public Message(int chatRoomId, String senderUsername, String recipientUsername, String content, LocalDateTime timeStamp) {
+        this.senderUsername = senderUsername;
+        this.recipientUsername = recipientUsername;
+        this.content = content;
+        this.timestamp = timeStamp;
+        this.chatRoomId=chatRoomId;
     }
 
     // Getters and setters
@@ -46,6 +55,14 @@ public class Message {
 
     public void setTimestamp(LocalDateTime timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public int getChatRoomId() {
+        return chatRoomId;
+    }
+
+    public void setChatRoomId(int chatRoomId) {
+        this.chatRoomId = chatRoomId;
     }
 
     // Override toString() method for debugging or displaying messages
