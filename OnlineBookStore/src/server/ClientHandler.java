@@ -96,7 +96,6 @@ public class ClientHandler extends Thread {
             res += r;
             res += "\n";
         }
-        res += "end";
         writer.println(res);
 
     }
@@ -163,6 +162,13 @@ public class ClientHandler extends Thread {
     private void handleStartChat(PrintWriter writer, String request) throws SQLException {
         String[] parts = request.split(":");
         String recieverUsername = parts[2];
+        System.out.println(loggedInUser.getUsername());
+        System.out.println(recieverUsername);
+        if(recieverUsername.equals(loggedInUser.getUsername()))
+            writer.println("You can't chat with yourself");
+
+        else
+        {
         if (onlineUsers.containsKey(recieverUsername)) {
 
             User recieverUser = userService.getUser(recieverUsername);
@@ -184,7 +190,7 @@ public class ClientHandler extends Thread {
 
         }
 
-    }
+    }}
 
     private void handleSendMessage(PrintWriter writer, String request) throws SQLException {
         String[] parts = request.split(":");
