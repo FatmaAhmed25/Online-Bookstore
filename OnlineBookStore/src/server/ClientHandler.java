@@ -90,7 +90,8 @@ public class ClientHandler extends Thread {
                     writer.println("Invalid request");
                     break;
             }
-        } }catch (IOException | SQLException e) {
+        } }
+        catch (IOException | SQLException e) {
             e.printStackTrace();
         }
     }
@@ -103,31 +104,68 @@ public class ClientHandler extends Thread {
             String statisticsType = parts[1];
 
             // Retrieve the relevant statistics data based on the type requested
-            String statisticsData = "";
+            String res = "";
             switch (statisticsType) {
+
                 case "overall":
-                    //getOverall();
+
+
                     break;
                 case "availablebooks":
                     List<Book>books=bookService.getAvailableBooks();
-                    String res = "";
                     assert books != null;
                     for (Book b : books) {
                         res += b;
                         res += "\n";
                     }
                     writer.println(res);
+
                     break;
                 case "borrowedbooks":
                     List<Book>borrowedBooks=bookService.getCurrentBorrowedBooks();
+                    assert borrowedBooks!= null;
+                    for (Book b : borrowedBooks) {
+                        res += b;
+                        res += "\n";
+                    }
+                    writer.println(res);
+
+                    break;
+                case "acceptedrequests":
+                    List<Request>acceptRequests=requestService.getAcceptedRequests();
+                    assert acceptRequests!=null;
+                    for (Request r : acceptRequests) {
+                        res += r;
+                        res += "\n";
+                    }
+                    writer.println(res);
+                    break;
+
+                case "rejectedrequests":
+                    List<Request>rejectedRequests=requestService.getRejectedRequests();
+                    assert rejectedRequests!=null;
+                    for (Request r : rejectedRequests) {
+                        res += r;
+                        res += "\n";
+                    }
+                    writer.println(res);
+                    break;
+                case "pendingrequests":
+                    List<Request>pendingRequests=requestService.getPendingRequests();
+                    assert pendingRequests!=null;
+                    for (Request r : pendingRequests) {
+                        res += r;
+                        res += "\n";
+                    }
+                    writer.println(res);
                     break;
                 default:
                     writer.println("Invalid statistics type");
-                    return;
+                        return;
             }
 
             // Send the statistics data back to the client
-            writer.println(statisticsData);
+           // writer.println(res);
         } catch (Exception e) {
             e.printStackTrace();
             writer.println("Error occurred while processing statistics request");

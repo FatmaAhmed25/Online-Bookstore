@@ -12,7 +12,7 @@ import java.util.List;
 
 public class MessageDAL {
     public void saveMessage(Message message) throws SQLException {
-        String query = "INSERT INTO Messages (chatRoomId, senderUsername, recipientUsername, content, timestamp) VALUES (?, ?, ?, ?, ?)";
+        String query = "INSERT INTO Messages (Id, senderUsername, recipientUsername, content, timestamp) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement statement = DatabaseService.getConnection().prepareStatement(query)) {
             statement.setInt(1, message.getChatRoomId());
             statement.setString(2, message.getSenderUsername());
