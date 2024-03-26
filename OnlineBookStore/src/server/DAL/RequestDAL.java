@@ -14,7 +14,7 @@ public class RequestDAL {
 
     // Get borrowing requests for a specific user as a borrower
     public List<Request> getRequestsForBorrower(int borrowerId) {
-        List<Request> pendingRequests = new ArrayList<>();
+        List<Request> borrowerRequests = new ArrayList<>();
         String getPendingRequestsSQL = "SELECT * FROM Requests WHERE borrower_id = ?";
 
         try (Connection conn = DatabaseService.getConnection();
@@ -29,13 +29,13 @@ public class RequestDAL {
                     Request request = new Request(borrowerId, lenderId, bookId);
                     request.setId(id);
                     request.setStatus(status);
-                    pendingRequests.add(request);
+                    borrowerRequests.add(request);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return pendingRequests;
+        return borrowerRequests;
     }
 
     // Add a borrowing request to the database
