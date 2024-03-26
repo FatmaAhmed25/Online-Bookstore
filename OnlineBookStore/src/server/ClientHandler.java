@@ -6,13 +6,13 @@ import server.model.*;
 import java.io.*;
 import java.net.Socket;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static server.BookStoreServer.clients;
 
 public class ClientHandler extends Thread {
+
+    private static Map<String, ClientHandler> onlineUsers = new HashMap<>();
     private final Socket clientSocket;
     private final UserService userService;
     private final RequestService requestService;
@@ -136,19 +136,27 @@ public class ClientHandler extends Thread {
     private void handleStartChat(PrintWriter writer, String request) throws SQLException {
         String[] parts = request.split(":");
         String recieverUsername = parts[2];
-        User recieverUser= userService.getUser(recieverUsername);
-        int recieverId = recieverUser.getId();
-        chatService.createChatRoom(loggedInUser.getId(), recieverId,recieverUsername,loggedInUser.getUsername());
-        ChatRoom room = chatService.getChatRoomByRequesterIdAndBorrowerId(loggedInUser.getId(), recieverId);
-        List<Message> messages = chatService.getMessagesByChatRoom(room.getChatRoomId());
-        String res = "";
-        for (Message r : messages) {
-            res += r;
-            res += "\n";
+        if (onlineUsers.containsKey(recieverUsername)) {
+
+            User recieverUser = userService.getUser(recieverUsername);
+            int recieverId = recieverUser.getId();
+            chatService.createChatRoom(loggedInUser.getId(), recieverId, recieverUsername, loggedInUser.getUsername());
+            ChatRoom room = chatService.getChatRoomByRequesterIdAndBorrowerId(loggedInUser.getId(), recieverId);
+            List<Message> messages = chatService.getMessagesByChatRoom(room.getChatRoomId());
+            String res = "";
+            for (Message r : messages) {
+                res += r;
+                res += "\n";
+            }
+            res += "end";
+            System.out.println(res);
+         writer.println(res);
+
         }
-        res += "end";
-        System.out.println(res);
-        writer.println(res);
+        else{
+            writer.println("The user is not online.");
+
+        }
 
     }
 
@@ -213,6 +221,7 @@ public class ClientHandler extends Thread {
                 return;
             }
 
+            onlineUsers.put(username, this);
             writer.println("200 Login successful");
             addToClients(user.getId(),writer);
             loggedInUser=user;
