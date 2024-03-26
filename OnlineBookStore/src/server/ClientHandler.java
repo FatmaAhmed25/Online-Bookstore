@@ -9,10 +9,9 @@ import java.sql.SQLException;
 import java.util.*;
 
 import static server.BookStoreServer.clients;
+import static server.BookStoreServer.onlineUsers;
 
 public class ClientHandler extends Thread {
-
-    private static Map<String, ClientHandler> onlineUsers = new HashMap<>();
     private final Socket clientSocket;
     private final UserService userService;
     private final RequestService requestService;
@@ -38,7 +37,7 @@ public class ClientHandler extends Thread {
             while(!exit){
             // Read the request from the client
             String request = reader.readLine();
-            if(request=="exit")
+            if(Objects.equals(request, "exit"))
                 exit=true;
             System.out.println(request);
             // Split the data string using ":" as the delimiter
@@ -73,11 +72,13 @@ public class ClientHandler extends Thread {
                     break;
                 case"request":
                     handleRequest(writer,request);
+                    break;
                 case "viewborrowrequests":
                     sendBorrowerRequests(writer);
                     break;
                 case "browse":
                     handleBrowse(writer);
+                    break;
 
                 default:
                     writer.println("Invalid request");
@@ -96,7 +97,6 @@ public class ClientHandler extends Thread {
             res += r;
             res += "\n";
         }
-        res += "end";
         writer.println(res);
 
     }
@@ -106,7 +106,7 @@ public class ClientHandler extends Thread {
         assert books != null;
         for (Book b : books) {
             res += b;
-            res += "\n";
+            res+="\n";
         }
         writer.println(res);
     }
@@ -163,8 +163,11 @@ public class ClientHandler extends Thread {
     private void handleStartChat(PrintWriter writer, String request) throws SQLException {
         String[] parts = request.split(":");
         String recieverUsername = parts[2];
-        if (onlineUsers.containsKey(recieverUsername)) {
-
+        if(!validChats(recieverUsername)){
+            writer.println("Unauthorized chat");
+            return;
+        }
+        if (BookStoreServer.onlineUsers.containsKey(recieverUsername)) {
             User recieverUser = userService.getUser(recieverUsername);
             int recieverId = recieverUser.getId();
             chatService.createChatRoom(loggedInUser.getId(), recieverId, recieverUsername, loggedInUser.getUsername());
@@ -181,28 +184,41 @@ public class ClientHandler extends Thread {
         }
         else{
             writer.println("The user is not online.");
-
         }
+
+    }
+
+    private boolean validChats(String recieverUsername)
+    {
+        return chatService.isValidChat(loggedInUser.getUsername(),recieverUsername);
 
     }
 
     private void handleSendMessage(PrintWriter writer, String request) throws SQLException {
         String[] parts = request.split(":");
         String recieverUsername = parts[2];
+
         User recieverUser= userService.getUser(recieverUsername);
         if(recieverUser==null)
         {
-            throw new NullPointerException("Receiver User is not found");
+            writer.println("Reciever User in not found");
+//            throw new NullPointerException("Receiver User is not found");
+            return;
+        }
+        if(!validChats(recieverUsername)){
+            writer.println("Unauthorized chat");
+            return;
         }
         int recieverID = recieverUser.getId();
-        String message =parts[3];
-        sendMessage(recieverID,message);
         ChatRoom room = chatService.getChatRoomByRequesterIdAndBorrowerId(loggedInUser.getId(), recieverID);
-        if(room == null )
-        {
-            writer.println("Unauthorized Chat");
-        }else
-            chatService.createMessage(room.getChatRoomId(),loggedInUser.getUsername(),recieverUsername,message);
+//        if(room == null )
+//        {
+//            writer.println("Unauthorized Chat");
+//        }
+        String message =parts[3];
+        assert room != null;
+        chatService.createMessage(room.getChatRoomId(),loggedInUser.getUsername(),recieverUsername,message);
+        sendMessage(recieverID,message);
     }
     public void sendMessage(int clientId, String message) {
         PrintWriter writer = clients.get(clientId);
@@ -247,7 +263,7 @@ public class ClientHandler extends Thread {
                 return;
             }
 
-            onlineUsers.put(username, this);
+            BookStoreServer.onlineUsers.put(username, this);
             writer.println("200 Login successful");
             addToClients(user.getId(),writer);
             loggedInUser=user;
@@ -317,7 +333,6 @@ public class ClientHandler extends Thread {
                 int quantity = Integer.parseInt(parts[6]);
                 System.out.println(quantity);
 
-
                 // Fetch userID from userService based on the username
                 //System.out.println(username);
                 int userID = userService.getUser(loggedInUser.getUsername()).getId();
@@ -346,9 +361,6 @@ public class ClientHandler extends Thread {
         // Read book title from the client
         String[] parts = data.split(":");
         int bookId = Integer.parseInt(parts[1]);
-
-        // Call the DatabaseService method to remove the book
-        // Modify the DatabaseService class to include a method for removing books
         if(bookService.removeBook(bookId,loggedInUser.getId())){
             writer.println("Book removed successfully");
         }
@@ -373,11 +385,14 @@ public class ClientHandler extends Thread {
         {
             books = bookService.getBooksByGenre(searchKey);
         }
+        else{
+            writer.println("Category is not found");
+            return;
+        }
         String res = "";
         assert books != null;
         for (Book book : books) {
             res += book;
-            res += "\n";
         }
         writer.println(res);
     }
@@ -386,7 +401,13 @@ public class ClientHandler extends Thread {
             // Parse request data
             String[] parts = data.split(":");
             int bookId = Integer.parseInt(parts[1]);
-            int lenderId =bookService.getBookByID(bookId).getOwnerID();
+            Book book =bookService.getBookByID(bookId);
+            int lenderId =book.getOwnerID();
+            if(book.getQuantity()==0)
+            {
+                writer.println("Cant lend this book because its quantity is zero");
+                return;
+            }
             if(lenderId == loggedInUser.getId())
             {
                 writer.println("Error: You cant lend your own book");
@@ -398,7 +419,6 @@ public class ClientHandler extends Thread {
                 writer.println("401 Unauthorized: You are not authorized to borrow this book");
                 return;
             }
-
 
             // Add the borrowing request to the database
             Request request=new Request(loggedInUser.getId(),lenderId,bookId);

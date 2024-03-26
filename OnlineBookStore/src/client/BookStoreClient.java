@@ -82,8 +82,7 @@ public class BookStoreClient {
             try {
                 String message;
                 while ((message = reader.readLine()) != null) {
-                    // Process other types of messages if needed
-                    System.out.println("\n***Server: "+message+"***");
+                    System.out.println("\n>> " + message);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -163,13 +162,6 @@ public class BookStoreClient {
     private static void viewMyRequests(PrintWriter writer, BufferedReader reader) throws IOException {
         // Send a request to the server to retrieve the borrower's requests
         writer.println("viewborrowrequests");
-
-        // Receive response from the server
-        String response;
-        while (!(response = reader.readLine()).equals("end")) {
-            // Display each request to the user
-            System.out.println(response);
-        }
     }
 
     private static void handleBrowse(PrintWriter writer) {
@@ -213,12 +205,14 @@ public class BookStoreClient {
          String recieverUsername=consoleInput.readLine();
          String message = "";
          writer.println("chat:start:"+recieverUsername);
-         while(!message.equals("x"))
-         {
-             System.out.print(">>>");
-             message=consoleInput.readLine();
-             writer.println("chat:send:"+recieverUsername+":"+message);
-         }
+        while (!message.equals("x")) {
+            System.out.print(">>>");
+            message = consoleInput.readLine();
+
+            if (!message.equals("x")) {
+                writer.println("chat:send:" + recieverUsername + ":" + message);
+            }
+        }
     }
 
     private static void handleLogin(BufferedReader consoleInput, PrintWriter writer, BufferedReader reader) throws IOException {

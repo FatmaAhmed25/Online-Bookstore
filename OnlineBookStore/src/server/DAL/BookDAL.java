@@ -48,7 +48,7 @@ public class BookDAL {
             pstmt.setInt(1, bookId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    return new Book(rs.getString("title"), rs.getString("author"), rs.getString("genre"), rs.getDouble("price"), rs.getString("description"), rs.getInt("owner_id"), rs.getInt("quantity"));
+                    return new Book(rs.getInt("id"),rs.getString("title"), rs.getString("author"), rs.getString("genre"), rs.getDouble("price"), rs.getString("description"), rs.getInt("owner_id"), rs.getInt("quantity"));
                 }
             }
         } catch (SQLException e) {
@@ -64,7 +64,7 @@ public class BookDAL {
             pstmt.setString(1, title);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    books.add(new Book(rs.getString("title"), rs.getString("author"), rs.getString("genre"), rs.getDouble("price"), rs.getString("description"), rs.getInt("owner_id"), rs.getInt("quantity")));
+                    books.add(new Book(rs.getInt("id"),rs.getString("title"), rs.getString("author"), rs.getString("genre"), rs.getDouble("price"), rs.getString("description"), rs.getInt("owner_id"), rs.getInt("quantity")));
                 }
             }
         } catch (SQLException e) {
@@ -79,7 +79,7 @@ public class BookDAL {
             pstmt.setString(1, author);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    books.add(new Book(rs.getString("title"), rs.getString("author"), rs.getString("genre"), rs.getDouble("price"), rs.getString("description"), rs.getInt("owner_id"), rs.getInt("quantity")));
+                    books.add(new Book(rs.getInt("id"),rs.getString("title"), rs.getString("author"), rs.getString("genre"), rs.getDouble("price"), rs.getString("description"), rs.getInt("owner_id"), rs.getInt("quantity")));
                 }
             }
         } catch (SQLException e) {
@@ -96,7 +96,7 @@ public class BookDAL {
             pstmt.setString(1, genre);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                    books.add(new Book(rs.getString("title"), rs.getString("author"), rs.getString("genre"), rs.getDouble("price"), rs.getString("description"), rs.getInt("owner_id"), rs.getInt("quantity")));
+                    books.add(new Book(rs.getInt("id"),rs.getString("title"), rs.getString("author"), rs.getString("genre"), rs.getDouble("price"), rs.getString("description"), rs.getInt("owner_id"), rs.getInt("quantity")));
                 }
             }
         } catch (SQLException e) {
@@ -132,6 +132,7 @@ public class BookDAL {
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
                     books.add(new Book(
+                            rs.getInt("id"),
                             rs.getString("title"),
                             rs.getString("author"),
                             rs.getString("genre"),

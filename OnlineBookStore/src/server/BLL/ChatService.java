@@ -41,4 +41,8 @@ public class ChatService {
     public List<Message> getMessagesByChatRoom(int chatRoomId) {
         return messageDB.getMessagesForChatRoom(chatRoomId);
     }
+
+    public boolean isValidChat(String username, String recieverUsername) {
+        return chatRoomDB.isValidChat(username, recieverUsername);
+    }
 }
