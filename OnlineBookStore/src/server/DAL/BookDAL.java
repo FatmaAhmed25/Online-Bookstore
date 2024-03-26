@@ -55,13 +55,12 @@ public class BookDAL {
             e.printStackTrace();
         }
         return null;
-
     }
 
     public ArrayList<Book> getBooksByTitle(String title) {
         ArrayList<Book> books = new ArrayList<>();
         try (Connection conn = DatabaseService.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE title = ?")) {
+             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE title = ? AND quantity > 0")) {
             pstmt.setString(1, title);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -72,13 +71,11 @@ public class BookDAL {
             e.printStackTrace();
         }
         return books;
-
     }
-
     public ArrayList<Book> getBooksByAuthor(String author) {
         ArrayList<Book> books = new ArrayList<>();
         try (Connection conn = DatabaseService.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE author = ?")) {
+             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE author = ? AND quantity > 0")) {
             pstmt.setString(1, author);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -95,7 +92,7 @@ public class BookDAL {
     public ArrayList<Book> getBooksByGenre(String genre) {
         ArrayList<Book> books = new ArrayList<>();
         try (Connection conn = DatabaseService.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE genre = ?")) {
+             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE genre = ? AND quantity > 0")) {
             pstmt.setString(1, genre);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
@@ -127,5 +124,43 @@ public class BookDAL {
         }
         return false;
 
+    }
+    public ArrayList<Book> getAvailableBooks() {
+        ArrayList<Book> books = new ArrayList<>();
+        try (Connection conn = DatabaseService.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE quantity > 0")) {
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    books.add(new Book(
+                            rs.getString("title"),
+                            rs.getString("author"),
+                            rs.getString("genre"),
+                            rs.getDouble("price"),
+                            rs.getString("description"),
+                            rs.getInt("owner_id"),
+                            rs.getInt("quantity")
+                    ));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    public void decreaseBookQuantity(int id) {
+        // Define the SQL update statement to decrement the quantity
+        String sql = "UPDATE Books SET quantity = quantity - 1 WHERE id = ? AND quantity > 0";
+        try (Connection conn = DatabaseService.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            // Set the title parameter in the SQL statement
+            pstmt.setInt(1, id);
+
+            // Execute the update statement
+            int rowsAffected = pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

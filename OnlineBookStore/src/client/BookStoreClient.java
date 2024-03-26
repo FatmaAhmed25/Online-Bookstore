@@ -104,10 +104,10 @@ public class BookStoreClient {
                     System.out.println("2. Remove book from store");
                     System.out.println("3. Search for a book");
                     System.out.println("4. Borrow Request");
-                    System.out.println("5. Start chat");
+                    System.out.println("5. Open chat");
                     System.out.println("6. Open messages");
                     System.out.println("7. Accept/Reject borrowing requests");
-                    System.out.println("7. Logout");
+                    System.out.println("8. Browse all books");
                     System.out.print("Choose an action: ");
                     int loggedInChoice = Integer.parseInt(consoleInput.readLine());
 
@@ -135,6 +135,9 @@ public class BookStoreClient {
 
                             break;
                         case 8:
+                            handleBrowse(writer);
+                            break;
+                        case 9:
                             loggedIn = false;
                             break;
                         default:
@@ -151,6 +154,11 @@ public class BookStoreClient {
         Thread loggedInThread = new Thread(loggedInTask);
         loggedInThread.start();
     }
+
+    private static void handleBrowse(PrintWriter writer) {
+        writer.println("browse");
+    }
+
     public static void searchActions() throws IOException {
         System.out.println("Search by:");
         System.out.println("1. Search by title");

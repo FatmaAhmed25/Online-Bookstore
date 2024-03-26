@@ -90,7 +90,6 @@ public class Book {
                 ", genre='" + genre + '\'' +
                 ", price='" + price +'\''+
                 ", quantity='" + quantity +'\''+
-                ", users =" + lentBy +
                 '}';
     }
 }
