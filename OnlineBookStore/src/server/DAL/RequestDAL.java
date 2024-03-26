@@ -38,6 +38,31 @@ public class RequestDAL {
         return borrowerRequests;
     }
 
+    public List<Request> getRequestsForLender(int lenderId) {
+        List<Request> lenderRequests = new ArrayList<>();
+        String getRequestsSQL = "SELECT * FROM Requests WHERE lender_id = ?";
+
+        try (Connection conn = DatabaseService.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(getRequestsSQL)) {
+            pstmt.setInt(1, lenderId);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    int borrowerId = rs.getInt("borrower_id");
+                    int bookId = rs.getInt("book_id");
+                    String status = rs.getString("status");
+                    Request request = new Request(borrowerId, lenderId, bookId);
+                    request.setId(id);
+                    request.setStatus(status);
+                    lenderRequests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return lenderRequests;
+    }
+
     // Add a borrowing request to the database
     public void addRequest(Request request) throws SQLException {
         String addRequestSQL = "INSERT INTO Requests (borrower_id, lender_id, book_id, status) VALUES (?, ?, ?, 'pending')";
@@ -83,10 +108,10 @@ public class RequestDAL {
     }
     public List<Request> getAcceptedRequestsForRequester(int userId) {
         List<Request> AcceptedRequests = new ArrayList<>();
-        String getPendingRequestsSQL = "SELECT * FROM Requests WHERE borrower_id = ? AND status = 'Accepted'";
+        String getRequestsSQL = "SELECT * FROM Requests WHERE borrower_id = ? AND status = 'Accepted'";
 
         try (Connection conn = DatabaseService.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(getPendingRequestsSQL)) {
+             PreparedStatement pstmt = conn.prepareStatement(getRequestsSQL)) {
             pstmt.setInt(1, userId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {

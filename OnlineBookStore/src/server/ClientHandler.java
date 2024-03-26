@@ -74,7 +74,10 @@ public class ClientHandler extends Thread {
                 case"request":
                     handleRequest(writer,request);
                 case "viewborrowrequests":
-                    sendBorrowerRequests(writer);
+                    viewBorrowerRequests(writer);
+                    break;
+                case "viewlenderequests":
+                    viewLenderRequests(writer);
                     break;
                 case "browse":
                     handleBrowse(writer);
@@ -87,7 +90,22 @@ public class ClientHandler extends Thread {
             e.printStackTrace();
         }
     }
-    private void sendBorrowerRequests(PrintWriter writer) {
+
+    private void viewLenderRequests(PrintWriter writer) {
+        System.out.println(loggedInUser.getId());
+        List<Request>requests=requestService.getRequestsForLender(loggedInUser.getId());
+        String res = "";
+        assert requests != null;
+        for (Request r : requests) {
+            res += r;
+            res += "\n";
+        }
+        writer.println(res);
+
+
+    }
+
+    private void viewBorrowerRequests(PrintWriter writer) {
         System.out.println(loggedInUser.getId());
         List<Request>requests=requestService.getRequestsForBorrower(loggedInUser.getId());
         String res = "";
@@ -169,46 +187,62 @@ public class ClientHandler extends Thread {
 
         else
         {
-        if (onlineUsers.containsKey(recieverUsername)) {
+            if (onlineUsers.containsKey(recieverUsername)) {
 
-            User recieverUser = userService.getUser(recieverUsername);
-            int recieverId = recieverUser.getId();
-            chatService.createChatRoom(loggedInUser.getId(), recieverId, recieverUsername, loggedInUser.getUsername());
-            ChatRoom room = chatService.getChatRoomByRequesterIdAndBorrowerId(loggedInUser.getId(), recieverId);
-            List<Message> messages = chatService.getMessagesByChatRoom(room.getChatRoomId());
-            String res = "";
-            for (Message r : messages) {
-                res += r;
-                res += "\n";
+                User recieverUser = userService.getUser(recieverUsername);
+                int recieverId = recieverUser.getId();
+                chatService.createChatRoom(loggedInUser.getId(), recieverId, recieverUsername, loggedInUser.getUsername());
+                ChatRoom room = chatService.getChatRoomByRequesterIdAndBorrowerId(loggedInUser.getId(), recieverId);
+                List<Message> messages = chatService.getMessagesByChatRoom(room.getChatRoomId());
+                String res = "";
+                for (Message r : messages) {
+                    res += r;
+                    res += "\n";
+                }
+                System.out.println(res);
+             writer.println(res);
+
             }
-            System.out.println(res);
-         writer.println(res);
+            else{
+                writer.println("The user is not online.");
+
+            }
 
         }
-        else{
-            writer.println("The user is not online.");
+    }
 
-        }
-
-    }}
-
-    private void handleSendMessage(PrintWriter writer, String request) throws SQLException {
+    private void handleSendMessage(PrintWriter writer, String request) throws SQLException
+    {
         String[] parts = request.split(":");
         String recieverUsername = parts[2];
+
         User recieverUser= userService.getUser(recieverUsername);
-        if(recieverUser==null)
+        if(recieverUsername.equals(loggedInUser.getUsername()))
+            writer.println("You can't chat with yourself");
+        else
         {
-            throw new NullPointerException("Receiver User is not found");
+            if(recieverUser==null)
+            {
+                throw new NullPointerException("Receiver User is not found");
+            }
+            int recieverID = recieverUser.getId();
+            String message =parts[3];
+            if(message.equals("x"))
+            {
+                writer.println("You left the chat");
+            }
+            else
+            {
+                sendMessage(recieverID,message);
+                ChatRoom room = chatService.getChatRoomByRequesterIdAndBorrowerId(loggedInUser.getId(), recieverID);
+                if(room == null )
+                {
+                    writer.println("Unauthorized Chat");
+                }
+                else
+                    chatService.createMessage(room.getChatRoomId(),loggedInUser.getUsername(),recieverUsername,message);
+            }
         }
-        int recieverID = recieverUser.getId();
-        String message =parts[3];
-        sendMessage(recieverID,message);
-        ChatRoom room = chatService.getChatRoomByRequesterIdAndBorrowerId(loggedInUser.getId(), recieverID);
-        if(room == null )
-        {
-            writer.println("Unauthorized Chat");
-        }else
-            chatService.createMessage(room.getChatRoomId(),loggedInUser.getUsername(),recieverUsername,message);
     }
     public void sendMessage(int clientId, String message) {
         PrintWriter writer = clients.get(clientId);
