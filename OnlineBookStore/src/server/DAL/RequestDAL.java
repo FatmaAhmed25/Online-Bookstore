@@ -12,6 +12,44 @@ import java.util.List;
 
 public class RequestDAL {
 
+    public List<Request> getAcceptedRequests() {
+        return getRequestsByStatus("Accepted");
+    }
+
+    public List<Request> getPendingRequests() {
+        return getRequestsByStatus("Pending");
+    }
+
+    public List<Request> getRejectedRequests() {
+        return getRequestsByStatus("Rejected");
+    }
+
+    private List<Request> getRequestsByStatus(String status) {
+        List<Request> requests = new ArrayList<>();
+        String sql = "SELECT * FROM Requests WHERE status = ?";
+
+        try (Connection conn = DatabaseService.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, status);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    int id = rs.getInt("id");
+                    int borrowerId = rs.getInt("borrower_id");
+                    int lenderId = rs.getInt("lender_id");
+                    int bookId = rs.getInt("book_id");
+                    Request request = new Request(borrowerId, lenderId, bookId);
+                    request.setId(id);
+                    request.setStatus(status);
+                    requests.add(request);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
+
+
     // Get borrowing requests for a specific user as a borrower
     public List<Request> getRequestsForBorrower(int borrowerId) {
         List<Request> borrowerRequests = new ArrayList<>();
