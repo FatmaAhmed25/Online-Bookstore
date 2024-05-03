@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 public class BookDAL
 {
-    public ArrayList<Book> getCurrentBorrowedBooks() {
+    public synchronized ArrayList<Book> getCurrentBorrowedBooks() {
         ArrayList<Book> borrowedBooks = new ArrayList<>();
         String sql = "SELECT * FROM Books WHERE id IN (SELECT DISTINCT book_id FROM Requests WHERE status = 'Accepted')";
 
@@ -36,7 +36,7 @@ public class BookDAL
         return borrowedBooks;
     }
 
-    public void addBook(Book book) throws SQLException {
+    public synchronized void addBook(Book book) throws SQLException {
         String addBookSQL = "INSERT INTO Books (title, author, genre, quantity, price, owner_id,description) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = DatabaseService.getConnection();
@@ -57,7 +57,7 @@ public class BookDAL
         }
     }
 
-    public void removeBook(int bookId) {
+    public synchronized void removeBook(int bookId) {
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("DELETE FROM Books WHERE id = ?")) {
             pstmt.setInt(1, bookId);
@@ -67,7 +67,7 @@ public class BookDAL
         }
     }
 
-    public Book getBookByID(int bookId) {
+    public synchronized Book getBookByID(int bookId) {
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE id = ?")) {
             pstmt.setInt(1, bookId);
@@ -75,14 +75,15 @@ public class BookDAL
                 if (rs.next()) {
                     return new Book(rs.getInt("id"),rs.getString("title"), rs.getString("author"), rs.getString("genre"), rs.getDouble("price"), rs.getString("description"), rs.getInt("owner_id"), rs.getInt("quantity"));
                 }
+                //else throw new NullPointerException("No book with this id");
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+      return null;
     }
 
-    public ArrayList<Book> getBooksByTitle(String title) {
+    public synchronized ArrayList<Book> getBooksByTitle(String title) {
         ArrayList<Book> books = new ArrayList<>();
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE title = ? AND quantity > 0")) {
@@ -97,7 +98,7 @@ public class BookDAL
         }
         return books;
     }
-    public ArrayList<Book> getBooksByAuthor(String author) {
+    public synchronized ArrayList<Book> getBooksByAuthor(String author) {
         ArrayList<Book> books = new ArrayList<>();
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE author = ? AND quantity > 0")) {
@@ -114,7 +115,7 @@ public class BookDAL
 
     }
 
-    public ArrayList<Book> getBooksByGenre(String genre) {
+    public synchronized ArrayList<Book> getBooksByGenre(String genre) {
         ArrayList<Book> books = new ArrayList<>();
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE genre = ? AND quantity > 0")) {
@@ -132,7 +133,7 @@ public class BookDAL
     }
 
 
-    public boolean bookBelongsToUser(int bookId, int lenderId) {
+    public synchronized boolean bookBelongsToUser(int bookId, int lenderId) {
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE owner_id = ? AND id= ?")) {
             pstmt.setInt(1, lenderId);
@@ -150,7 +151,7 @@ public class BookDAL
         return false;
 
     }
-    public ArrayList<Book> getAvailableBooks() {
+    public synchronized ArrayList<Book> getAvailableBooks() {
         ArrayList<Book> books = new ArrayList<>();
         try (Connection conn = DatabaseService.getConnection();
              PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM Books WHERE quantity > 0")) {
@@ -174,7 +175,7 @@ public class BookDAL
         return books;
     }
 
-    public void decreaseBookQuantity(int id) {
+    public synchronized void decreaseBookQuantity(int id) {
         // Define the SQL update statement to decrement the quantity
         String sql = "UPDATE Books SET quantity = quantity - 1 WHERE id = ? AND quantity > 0";
         try (Connection conn = DatabaseService.getConnection();

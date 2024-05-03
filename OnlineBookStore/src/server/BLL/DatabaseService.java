@@ -27,7 +27,6 @@ public class DatabaseService {
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USERNAME, PASSWORD);
     }
-
     public static void createTables()
     {
         try (Connection conn = getConnection();
@@ -105,7 +104,7 @@ public class DatabaseService {
         try (PreparedStatement pstmt = conn.prepareStatement("INSERT IGNORE INTO Users (name, username, password) VALUES (?, ?, ?)")) {
             pstmt.setString(1, "Admin");
             pstmt.setString(2, "admin");
-            pstmt.setString(3, "admin123"); // You should hash the password for security in a real-world scenario
+            pstmt.setString(3, "admin123");
             pstmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();

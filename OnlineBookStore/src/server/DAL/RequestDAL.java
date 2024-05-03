@@ -12,19 +12,19 @@ import java.util.List;
 
 public class RequestDAL {
 
-    public List<Request> getAcceptedRequests() {
+    public synchronized List<Request> getAcceptedRequests() {
         return getRequestsByStatus("Accepted");
     }
 
-    public List<Request> getPendingRequests() {
+    public synchronized List<Request> getPendingRequests() {
         return getRequestsByStatus("Pending");
     }
 
-    public List<Request> getRejectedRequests() {
+    public synchronized List<Request> getRejectedRequests() {
         return getRequestsByStatus("Rejected");
     }
 
-    private List<Request> getRequestsByStatus(String status) {
+    private synchronized List<Request> getRequestsByStatus(String status) {
         List<Request> requests = new ArrayList<>();
         String sql = "SELECT * FROM Requests WHERE status = ?";
 
@@ -51,7 +51,7 @@ public class RequestDAL {
 
 
     // Get borrowing requests for a specific user as a borrower
-    public List<Request> getRequestsForBorrower(int borrowerId) {
+    public synchronized List<Request> getRequestsForBorrower(int borrowerId) {
         List<Request> borrowerRequests = new ArrayList<>();
         String getPendingRequestsSQL = "SELECT * FROM Requests WHERE borrower_id = ?";
 
@@ -76,7 +76,7 @@ public class RequestDAL {
         return borrowerRequests;
     }
 
-    public List<Request> getRequestsForLender(int lenderId) {
+    public synchronized List<Request> getRequestsForLender(int lenderId) {
         List<Request> lenderRequests = new ArrayList<>();
         String getRequestsSQL = "SELECT * FROM Requests WHERE lender_id = ?";
 
@@ -102,7 +102,7 @@ public class RequestDAL {
     }
 
     // Add a borrowing request to the database
-    public void addRequest(Request request) throws SQLException {
+    public synchronized void addRequest(Request request) throws SQLException {
         String addRequestSQL = "INSERT INTO Requests (borrower_id, lender_id, book_id, status) VALUES (?, ?, ?, 'pending')";
 
         try (Connection conn = DatabaseService.getConnection();
@@ -119,7 +119,7 @@ public class RequestDAL {
     }
 
     // Get pending borrowing requests for a specific user
-    public List<Request> getPendingRequestsForLender(int userId) {
+    public synchronized List<Request> getPendingRequestsForLender(int userId) {
         List<Request> pendingRequests = new ArrayList<>();
         String getPendingRequestsSQL = "SELECT * FROM Requests WHERE lender_id = ? AND status = 'Pending'";
 
@@ -144,7 +144,7 @@ public class RequestDAL {
         }
         return pendingRequests;
     }
-    public List<Request> getAcceptedRequestsForRequester(int userId) {
+    public synchronized List<Request> getAcceptedRequestsForRequester(int userId) {
         List<Request> AcceptedRequests = new ArrayList<>();
         String getRequestsSQL = "SELECT * FROM Requests WHERE borrower_id = ? AND status = 'Accepted'";
 
@@ -170,7 +170,7 @@ public class RequestDAL {
     }
 
     // Get all borrowing requests for a specific user
-    public List<Request> getAllRequestsForUser(int userId) {
+    public synchronized List<Request> getAllRequestsForUser(int userId) {
         List<Request> allRequests = new ArrayList<>();
         String getAllRequestsSQL = "SELECT * FROM Requests WHERE lender_id = ? OR borrower_id = ?";
 
@@ -199,16 +199,16 @@ public class RequestDAL {
     }
 
     // Accept a borrowing request
-    public void acceptRequest(int requestId) {
+    public synchronized void acceptRequest(int requestId) {
         updateRequestStatus(requestId, "Accepted");
     }
 
     // Reject a borrowing request
-    public void rejectRequest(int requestId) {
+    public synchronized void rejectRequest(int requestId) {
         updateRequestStatus(requestId, "Rejected");
     }
 
-    private void updateRequestStatus(int requestId, String status) {
+    private synchronized void updateRequestStatus(int requestId, String status) {
         String updateRequestStatusSQL = "UPDATE Requests SET status = ? WHERE id = ?";
 
         try (Connection conn = DatabaseService.getConnection();
@@ -223,7 +223,7 @@ public class RequestDAL {
         }
     }
 
-    public Request getRequest(int requestId) {
+    public synchronized Request getRequest(int requestId) {
         String getPendingRequestsSQL = "SELECT * FROM Requests WHERE id = ?";
         Request request = null;
 

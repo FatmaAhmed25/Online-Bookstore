@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ChatRoomDAL {
-    public void saveChatRoom(int requesterId, int borrwerId,String requesterUsername,String lenderUsername) throws SQLException {
+    public synchronized void saveChatRoom(int requesterId, int borrwerId,String requesterUsername,String lenderUsername) throws SQLException {
         String query = "INSERT INTO ChatRooms (requester_id, lender_id,senderUsername,recipientUsername) VALUES (?, ?, ?, ?)";
         try (PreparedStatement statement = DatabaseService.getConnection().prepareStatement(query)) {
             statement.setInt(1, requesterId);
@@ -20,7 +20,7 @@ public class ChatRoomDAL {
             statement.executeUpdate();
         }
     }
-    public List<ChatRoom> getChatRoomsForUser(int userId) {
+    public synchronized List<ChatRoom> getChatRoomsForUser(int userId) {
         List<ChatRoom> chatRooms = new ArrayList<>();
 
         String sql = "SELECT * FROM ChatRooms WHERE requester_id = ? OR lender_id = ?";
@@ -47,7 +47,7 @@ public class ChatRoomDAL {
         return chatRooms;
     }
 
-    public ChatRoom getChatRoomByRequesterIdAndBorrowerId(int requesterId, int lenderId) {
+    public synchronized ChatRoom getChatRoomByRequesterIdAndBorrowerId(int requesterId, int lenderId) {
         ChatRoom chatRoom = null;
         String sql = "SELECT * FROM ChatRooms WHERE (requester_id = ? AND lender_id = ?) OR (lender_id = ? AND requester_id = ?)";
         try (PreparedStatement statement = DatabaseService.getConnection().prepareStatement(sql)) {

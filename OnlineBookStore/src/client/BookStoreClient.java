@@ -63,18 +63,19 @@ public class BookStoreClient {
                 switch (action.toLowerCase()) {
                     case "login":
                         handleLogin(consoleInput, writer, reader);
-                        recieveFromServer();
+
 
                         break;
                     case "register":
                         handleRegistration(consoleInput, writer, reader);
+
                         break;
 
                     default:
                         System.out.println("Invalid action. Please enter 'login', 'register'");
                         break;
-          //  }
-        } }catch (IOException e) {
+          // }
+        } }catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -105,13 +106,11 @@ public class BookStoreClient {
                     System.out.println("3. Search for a book");
                     System.out.println("4. Borrow Request");
                     System.out.println("5. Open chat");
-                    System.out.println("6. Open messages");
-                    System.out.println("7. Accept/Reject borrowing requests");
-                    System.out.println("8. view borrowing requests");
-                    System.out.println("9. view lending requests");
-                    System.out.println("10. Browse all books");
-                    System.out.println("11. Statistics");
-                    System.out.println("12. Logout");
+                    System.out.println("6. Accept/Reject borrowing requests");
+                    System.out.println("7. view borrowing requests");
+                    System.out.println("8. view lending requests");
+                    System.out.println("9. Browse all books");
+                    System.out.println("10. Logout");
                     System.out.print("Choose an action: ");
                     int loggedInChoice = Integer.parseInt(consoleInput.readLine());
 
@@ -132,37 +131,49 @@ public class BookStoreClient {
                             handleChat(writer, reader);
                             break;
                         case 6:
-                            // Handle opening messages
+                            requestsMenu(writer,reader);
                             break;
                         case 7:
-                            requestsMenu(writer,reader);
-
-                            break;
-                        case 8:
                             viewMyRequestsAsBorrower(writer);
                             break;
-                        case 9:
+                        case 8:
                             viewMyRequestsAsLender(writer);
+                            break;
+                        case 9:
+                            handleBrowse(writer);
                             break;
 
                         case 10:
-                            handleBrowse(writer);
-                            break;
-                        case 11:
-                            // Open statistics menu
-                            if(isAdmin)
-                              statisticsMenu();
-                            else
-                                System.out.println("You are not an admin");
-                            break;
-
-                        case 12:
                             loggedIn = false;
                             break;
+
                         default:
                             System.out.println("Invalid choice.");
                     }
                 }
+                // After logging out, prompt for login or register
+                System.out.println("Do you want to login or register?");
+                System.out.println("1. Login");
+                System.out.println("2. Register");
+                System.out.println("3. Exit");
+                System.out.print("Choose an option: ");
+                int choice = Integer.parseInt(consoleInput.readLine());
+
+                switch (choice) {
+                    case 1:
+                        handleLogin(consoleInput, writer, reader);
+                        break;
+                    case 2:
+                        handleRegistration(consoleInput, writer, reader);
+                        break;
+                    case 3:
+                        System.out.println("Goodbye!");
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Exiting.");
+                        break;
+                }
+
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (InterruptedException e) {
@@ -174,47 +185,81 @@ public class BookStoreClient {
         loggedInThread.start();
     }
 
-    private static void statisticsMenu() throws IOException
+    private static void statisticsMenu()
     {
-        System.out.println("\nStatistics Menu:");
-        System.out.println("1. Overall Statistics");
-        System.out.println("2. Available Books");
-        System.out.println("3. Current Borrowed Books");
-        System.out.println("4. Accepted Requests");
-        System.out.println("5. Pending Requests");
-        System.out.println("6. Rejected Requests");
-        System.out.print("Choose an option: ");
-        int choice = Integer.parseInt(consoleInput.readLine());
-        switch (choice) {
-            case 1:
-                System.out.println("Overall Statistics:");
-                break;
-            case 2:
-                writer.println("statistics:availablebooks");
-                System.out.println("Available Books Statistics:");
 
-                break;
-            case 3:
-                writer.println("statistics:borrowedbooks");
-                System.out.println("Current Borrowed Books Statistics:");
+        Runnable loggedInTask = () -> {
+            boolean loggedIn = true;
+            while (loggedIn)
+            {
+                try {
+                    Thread.sleep(600);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println("\nStatistics Menu:");
+                System.out.println("1. Overall Statistics");
+                System.out.println("2. Available Books");
+                System.out.println("3. Current Borrowed Books");
+                System.out.println("4. Accepted Requests");
+                System.out.println("5. Pending Requests");
+                System.out.println("6. Rejected Requests");
+                System.out.println("7. Logout");
 
-                break;
-            case 4:
-                writer.println("statistics:acceptedrequests");
-                System.out.println("Accepted Requests Statistics:");
-                break;
-            case 5:
-                writer.println("statistics:rejectedrequests");
-                System.out.println("Rejected Requests Statistics:");
-                break;
-            case 6:
-                writer.println("statistics:pendingrequests");
-                System.out.println("pending Requests Statistics:");
-                break;
+                System.out.print("Choose an option: ");
+                int choice = 0;
+                try
+                {
+                    choice = Integer.parseInt(consoleInput.readLine());
+                }
+                catch (IOException e)
+                {
+                    throw new RuntimeException(e);
+                }
+                switch (choice)
+                {
+                    case 1:
+                        writer.println("statistics:availablebooks");
+                        writer.println("statistics:borrowedbooks");
+                        writer.println("statistics:acceptedrequests");
+                        writer.println("statistics:rejectedrequests");
+                        writer.println("statistics:pendingrequests");
 
-            default:
-                System.out.println("Invalid choice.");
-        }
+                        break;
+                    case 2:
+                        writer.println("statistics:availablebooks");
+                        System.out.println("Available Books Statistics:");
+
+                        break;
+                    case 3:
+                        writer.println("statistics:borrowedbooks");
+                        System.out.println("Current Borrowed Books Statistics:");
+
+                        break;
+                    case 4:
+                        writer.println("statistics:acceptedrequests");
+                        System.out.println("Accepted Requests Statistics:");
+                        break;
+                    case 5:
+                        writer.println("statistics:rejectedrequests");
+                        System.out.println("Rejected Requests Statistics:");
+                        break;
+                    case 6:
+                        writer.println("statistics:pendingrequests");
+                        System.out.println("pending Requests Statistics:");
+                        break;
+                    case 7:
+                        loggedIn = false;
+                        break;
+
+                    default:
+                        System.out.println("Invalid choice.");
+                }
+            }
+            };
+        // Start a new thread for loggedInTask
+        Thread loggedInThread = new Thread(loggedInTask);
+        loggedInThread.start();
     }
     private static void viewMyRequestsAsBorrower(PrintWriter writer) throws IOException {
         // Send a request to the server to retrieve the borrower's requests
@@ -225,6 +270,61 @@ public class BookStoreClient {
         // Send a request to the server to retrieve the borrower's requests
         writer.println("viewlenderequests");
 
+    }
+    private static void handleLogin(BufferedReader consoleInput, PrintWriter writer, BufferedReader reader) throws IOException, InterruptedException {
+        // Prompt user for username and password
+        System.out.println("Enter username:");
+        String username = consoleInput.readLine();
+
+        username1=username;
+        System.out.println("Enter password:");
+        String password = consoleInput.readLine();
+        writer.println("login"+":"+username+":"+password);
+
+        String response = reader.readLine();
+        System.out.println("Server response: " + response);
+        if (response.contains("2")) {
+            // Check if the user is an admin
+            if (username.equals("admin"))
+            {
+                System.out.println("You are now logged in as admin.");
+                recieveFromServer();
+                statisticsMenu();
+
+
+                // isAdmin = true;
+            }
+            else
+            {
+                System.out.println("You are now logged in as a regular user.");
+                recieveFromServer();
+                //isAdmin = false;
+                loggedInActions();
+            }
+
+        }
+        else {
+            System.out.println("Login failed. Please try again.");
+
+        }
+    }
+    private static void handleRegistration(BufferedReader consoleInput, PrintWriter writer, BufferedReader reader) throws IOException {
+        // Prompt user for registration details
+        System.out.println("Enter name:");
+        String name = consoleInput.readLine();
+        System.out.println("Enter username:");
+        String username = consoleInput.readLine();
+        username1=username;
+        System.out.println("Enter password:");
+        String password = consoleInput.readLine();
+        writer.println("register"+":"+name+":"+username+":"+password);
+        // Receive response from server
+        String response = reader.readLine();
+        System.out.println("Server response: " + response);
+        if (response.contains("2"))
+        {
+        loggedInActions();
+        }
     }
 
 
@@ -287,49 +387,9 @@ public class BookStoreClient {
         }
     }
 
-    private static void handleLogin(BufferedReader consoleInput, PrintWriter writer, BufferedReader reader) throws IOException {
-        // Prompt user for username and password
-        System.out.println("Enter username:");
-        String username = consoleInput.readLine();
-        username1=username;
-        System.out.println("Enter password:");
-        String password = consoleInput.readLine();
-        writer.println("login"+":"+username+":"+password);
-        // Check if the user is an admin
-        if (username.contains("admin")) {
-            System.out.println("You are now logged in as admin.");
-            isAdmin = true;
-
-        }
-        else
-        {
-            System.out.println("You are now logged in as a regular user.");
-            isAdmin = false;
-        }
 
 
 
-        String response = reader.readLine();
-        System.out.println("Server response: " + response);
-        if (response.contains("2")) {
-            System.out.println("You are now logged in.");
-            loggedInActions();
-        }
-    }
-
-    private static void handleRegistration(BufferedReader consoleInput, PrintWriter writer, BufferedReader reader) throws IOException {
-        // Prompt user for registration details
-        System.out.println("Enter name:");
-        String name = consoleInput.readLine();
-        System.out.println("Enter username:");
-        String username = consoleInput.readLine();
-        System.out.println("Enter password:");
-        String password = consoleInput.readLine();
-        writer.println("register"+":"+name+":"+username+":"+password);
-        // Receive response from server
-        String response = reader.readLine();
-        System.out.println("Server response: " + response);
-    }
 
     private static void handleAddBook(BufferedReader consoleInput, PrintWriter writer, BufferedReader reader) throws IOException {
         // Prompt user for book details
@@ -363,6 +423,7 @@ private static void handleRemoveBook(BufferedReader consoleInput, PrintWriter wr
         // Prompt user for book ID and lender's username
         System.out.println("Enter book ID you want to borrow:");
         int bookId = Integer.parseInt(consoleInput.readLine());
+
         // Send borrowing request to server
         writer.println("borrow:" + bookId );
     }
