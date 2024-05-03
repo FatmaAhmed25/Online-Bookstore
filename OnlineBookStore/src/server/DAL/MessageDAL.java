@@ -11,8 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MessageDAL {
-    public void saveMessage(Message message) throws SQLException {
-        String query = "INSERT INTO Messages (Id, senderUsername, recipientUsername, content, timestamp) VALUES (?, ?, ?, ?, ?)";
+    public synchronized void saveMessage(Message message) throws SQLException {
+        String query = "INSERT INTO Messages (chatRoomId, senderUsername, recipientUsername, content, timestamp) VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement statement = DatabaseService.getConnection().prepareStatement(query)) {
             statement.setInt(1, message.getChatRoomId());
             statement.setString(2, message.getSenderUsername());
@@ -22,10 +22,10 @@ public class MessageDAL {
             statement.executeUpdate();
         }
     }
-    public List<Message> getMessagesForChatRoom(int chatRoomId) {
+    public synchronized List<Message> getMessagesForChatRoom(int chatRoomId) {
         List<Message> messages = new ArrayList<>();
 
-        String sql = "SELECT * FROM Messages WHERE id = ? ORDER BY timestamp ASC"; // Sorting by timestamp in ascending order
+        String sql = "SELECT * FROM Messages WHERE chatRoomId = ? ORDER BY timestamp ASC"; // Sorting by timestamp in ascending order
 
         try (PreparedStatement statement = DatabaseService.getConnection().prepareStatement(sql)) {
             statement.setInt(1, chatRoomId);

@@ -24,9 +24,6 @@ public class BookStoreServer {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connected: " + clientSocket.getInetAddress().getHostAddress());
 
-                PrintWriter writer = new PrintWriter(clientSocket.getOutputStream(), true);
-                BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
                 // Spawn a new thread to handle client communication
                 ClientHandler clientHandler = new ClientHandler(clientSocket);
                 clientHandler.start();
